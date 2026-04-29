@@ -1,0 +1,35 @@
+.env
+.env.local
+.env.*.local
+node_modules/
+.next/
+.vercel/
+dist/
+build/
+*.log
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+*.egg-info/
+api/.env
+web/.env.local
+data/raw/
+data/processed/
+models/*.pkl
+models/*.joblib
+
+# Fly
+.fly/
+
+# Editor
+.vscode/
+.idea/
+
+# Tooling (project-local Claude settings)
+.claude/
