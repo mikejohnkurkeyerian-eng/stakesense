@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import ConnectBar from "@/components/ConnectBar";
+import Footer from "@/components/Footer";
 import WalletProvider from "@/components/WalletProvider";
 
 import "./globals.css";
@@ -56,7 +57,8 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-slate-50">
         <WalletProvider>
           <ConnectBar />
-          {children}
+          <div className="flex-1">{children}</div>
+          <Footer />
         </WalletProvider>
       </body>
     </html>
