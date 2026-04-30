@@ -49,6 +49,40 @@ def list_validators(
     return {"results": rows, "total": total, "limit": limit, "offset": offset}
 
 
+@router.get("/stats")
+def stats() -> dict:
+    sql = text(
+        """
+        WITH latest AS (
+          SELECT DISTINCT ON (vote_pubkey) * FROM predictions
+           ORDER BY vote_pubkey, prediction_date DESC
+        )
+        SELECT
+          AVG(mev_tax_rate)               AS avg_mev_tax,
+          AVG(downtime_prob_7d)           AS avg_downtime_prob,
+          AVG(decentralization_score)     AS avg_decentralization,
+          AVG(composite_score)            AS avg_composite,
+          COUNT(*)                        AS total_scored,
+          (SELECT COUNT(*) FROM validators WHERE active_stake > 0) AS active_validators,
+          (SELECT MAX(epoch) FROM epoch_performance)               AS latest_epoch,
+          (SELECT MAX(prediction_date) FROM predictions)           AS latest_prediction_date
+          FROM latest
+        """
+    )
+    with engine.begin() as conn:
+        row = conn.execute(sql).mappings().one()
+    return {
+        "avg_mev_tax": float(row["avg_mev_tax"]) if row["avg_mev_tax"] is not None else None,
+        "avg_downtime_prob": float(row["avg_downtime_prob"]) if row["avg_downtime_prob"] is not None else None,
+        "avg_decentralization": float(row["avg_decentralization"]) if row["avg_decentralization"] is not None else None,
+        "avg_composite": float(row["avg_composite"]) if row["avg_composite"] is not None else None,
+        "total_scored": int(row["total_scored"]),
+        "active_validators": int(row["active_validators"]),
+        "latest_epoch": int(row["latest_epoch"]) if row["latest_epoch"] is not None else None,
+        "latest_prediction_date": str(row["latest_prediction_date"]) if row["latest_prediction_date"] else None,
+    }
+
+
 @router.get("/{vote_pubkey}")
 def get_validator(vote_pubkey: str) -> dict:
     sql = text(

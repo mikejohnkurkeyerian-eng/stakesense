@@ -1,65 +1,143 @@
-import Image from "next/image";
+import Link from "next/link";
 
-export default function Home() {
+type Stats = {
+  avg_mev_tax: number | null;
+  avg_downtime_prob: number | null;
+  avg_decentralization: number | null;
+  avg_composite: number | null;
+  total_scored: number;
+  active_validators: number;
+  latest_epoch: number | null;
+  latest_prediction_date: string | null;
+};
+
+async function fetchStats(): Promise<Stats | null> {
+  try {
+    const r = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/validators/stats`,
+      { next: { revalidate: 300 } }
+    );
+    return r.ok ? r.json() : null;
+  } catch {
+    return null;
+  }
+}
+
+function pct(x: number | null | undefined) {
+  return x == null ? "—" : `${(x * 100).toFixed(1)}%`;
+}
+
+export default async function Home() {
+  const stats = await fetchStats();
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+    <main className="min-h-screen">
+      <section className="container mx-auto px-6 py-20 text-center">
+        <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">
+          Stake smarter.
+          <br />
+          <span className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
+            Decentralize Solana.
+          </span>
+        </h1>
+        <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-10">
+          ML-powered validator scoring on three pillars: predicted downtime risk,
+          MEV-extracted-from-delegators, and decentralization impact. Updated every epoch.
+        </p>
+        <div className="flex gap-3 justify-center flex-wrap">
+          <Link
+            href="/validators"
+            className="px-6 py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium"
+          >
+            Browse validators
+          </Link>
           <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href={`${process.env.NEXT_PUBLIC_API_BASE}/docs`}
             target="_blank"
             rel="noopener noreferrer"
+            className="px-6 py-3 border border-slate-300 rounded-lg hover:bg-slate-50 font-medium"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
+            API docs ↗
           </a>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {stats && (
+        <section className="container mx-auto px-6 pb-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="border rounded-lg p-6 bg-white">
+              <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">
+                Validators scored
+              </div>
+              <div className="text-3xl font-bold">
+                {stats.total_scored.toLocaleString()}
+              </div>
+              <div className="text-xs text-slate-400 mt-1">
+                of {stats.active_validators.toLocaleString()} active
+              </div>
+            </div>
+            <div className="border rounded-lg p-6 bg-white">
+              <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">
+                Avg downtime risk
+              </div>
+              <div className="text-3xl font-bold">
+                {pct(stats.avg_downtime_prob)}
+              </div>
+              <div className="text-xs text-slate-400 mt-1">predicted, 7d horizon</div>
+            </div>
+            <div className="border rounded-lg p-6 bg-white">
+              <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">
+                Avg MEV tax
+              </div>
+              <div className="text-3xl font-bold">{pct(stats.avg_mev_tax)}</div>
+              <div className="text-xs text-slate-400 mt-1">commission on MEV</div>
+            </div>
+            <div className="border rounded-lg p-6 bg-white">
+              <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">
+                Latest epoch
+              </div>
+              <div className="text-3xl font-bold">{stats.latest_epoch ?? "—"}</div>
+              <div className="text-xs text-slate-400 mt-1">
+                {stats.latest_prediction_date ?? ""}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="container mx-auto px-6 pb-20">
+        <h2 className="text-3xl font-bold mb-8 text-center">How it works</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="border rounded-lg p-6">
+            <div className="text-sm font-semibold text-violet-600 mb-2">
+              1. Downtime risk
+            </div>
+            <p className="text-sm text-slate-600">
+              LightGBM classifier trained on rolling 5-epoch validator performance
+              predicts the probability of a skip-rate spike or delinquency in the
+              next 3 epochs.
+            </p>
+          </div>
+          <div className="border rounded-lg p-6">
+            <div className="text-sm font-semibold text-blue-600 mb-2">
+              2. MEV tax
+            </div>
+            <p className="text-sm text-slate-600">
+              Reads Jito MEV commission per validator. The fraction of MEV revenue
+              the validator keeps for themselves vs. passing back to delegators.
+            </p>
+          </div>
+          <div className="border rounded-lg p-6">
+            <div className="text-sm font-semibold text-emerald-600 mb-2">
+              3. Decentralization
+            </div>
+            <p className="text-sm text-slate-600">
+              Penalizes validators that share a data center, ASN, or country with
+              many others. Bonus for staying outside the top-30 by stake
+              (superminority).
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
