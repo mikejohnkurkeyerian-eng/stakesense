@@ -48,3 +48,18 @@ export async function getBacktest(epochs = 90) {
     `/api/v1/backtest?epochs=${epochs}`
   );
 }
+
+export type PredictionPoint = {
+  prediction_date: string;
+  model_version: string;
+  composite_score: number | null;
+  downtime_prob_7d: number | null;
+  mev_tax_rate: number | null;
+  decentralization_score: number | null;
+};
+
+export async function getPredictionHistory(votePubkey: string, limit = 30) {
+  return get<{ vote_pubkey: string; history: PredictionPoint[] }>(
+    `/api/v1/validators/${votePubkey}/predictions?limit=${limit}`
+  );
+}

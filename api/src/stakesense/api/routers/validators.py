@@ -147,6 +147,26 @@ def clusters(
     return {"by": by, "clusters": rows}
 
 
+@router.get("/{vote_pubkey}/predictions")
+def predictions_history(vote_pubkey: str, limit: int = Query(30, ge=1, le=180)) -> dict:
+    sql = text(
+        """
+        SELECT prediction_date, model_version,
+               composite_score, downtime_prob_7d, mev_tax_rate, decentralization_score
+          FROM predictions
+         WHERE vote_pubkey = :pk
+         ORDER BY prediction_date DESC
+         LIMIT :limit
+        """
+    )
+    with engine.begin() as conn:
+        rows = [dict(r._mapping) for r in conn.execute(sql, {"pk": vote_pubkey, "limit": limit})]
+    for r in rows:
+        if r.get("prediction_date") is not None:
+            r["prediction_date"] = str(r["prediction_date"])
+    return {"vote_pubkey": vote_pubkey, "history": rows}
+
+
 @router.get("/{vote_pubkey}")
 def get_validator(vote_pubkey: str) -> dict:
     sql = text(

@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 import HistoryCharts from "@/components/HistoryCharts";
-import { getValidator } from "@/lib/api";
+import PredictionHistoryChart from "@/components/PredictionHistoryChart";
+import { getPredictionHistory, getValidator } from "@/lib/api";
 
 function shortPk(pk: string) {
   return `${pk.slice(0, 4)}…${pk.slice(-4)}`;
@@ -13,7 +14,10 @@ export default async function Page({
   params: Promise<{ vote_pubkey: string }>;
 }) {
   const p = await params;
-  const data = await getValidator(p.vote_pubkey);
+  const [data, predHistory] = await Promise.all([
+    getValidator(p.vote_pubkey),
+    getPredictionHistory(p.vote_pubkey, 30).catch(() => null),
+  ]);
   const v = data.validator;
 
   return (
@@ -65,6 +69,15 @@ export default async function Page({
           </div>
         </div>
       </div>
+
+      {predHistory && (
+        <>
+          <h2 className="text-xl font-semibold mb-4">Score history</h2>
+          <div className="mb-8">
+            <PredictionHistoryChart history={predHistory.history} />
+          </div>
+        </>
+      )}
 
       <h2 className="text-xl font-semibold mb-4">Recent epochs</h2>
       <div className="mb-8">
