@@ -2,7 +2,7 @@
 
 Predictive validator quality oracle for Solana. ML-powered scoring on three pillars (downtime risk, MEV tax, decentralization) exposed as a public REST API + dashboard + wallet-integrated stake flow.
 
-Status: Day 1 in progress — Solana Frontier hackathon (Colosseum, Apr–May 2026).
+Status: Day 1 ✅ — repo + Supabase schema + first live validator pull.
 
 ## Layout
 
