@@ -103,6 +103,31 @@ def stats() -> dict:
     }
 
 
+@router.get("/clusters")
+def clusters(
+    by: Literal["data_center", "asn", "country"] = "data_center",
+    top: int = Query(15, ge=1, le=50),
+) -> dict:
+    sql = text(
+        f"""
+        SELECT COALESCE({by}, '(unknown)') AS cluster,
+               COUNT(*)                   AS n_validators,
+               SUM(active_stake)          AS total_stake
+          FROM validators
+         WHERE active_stake > 0
+         GROUP BY {by}
+         ORDER BY n_validators DESC
+         LIMIT :top
+        """
+    )
+    with engine.begin() as conn:
+        rows = [dict(r._mapping) for r in conn.execute(sql, {"top": top})]
+    for r in rows:
+        if r.get("total_stake") is not None:
+            r["total_stake"] = int(r["total_stake"])
+    return {"by": by, "clusters": rows}
+
+
 @router.get("/{vote_pubkey}")
 def get_validator(vote_pubkey: str) -> dict:
     sql = text(
