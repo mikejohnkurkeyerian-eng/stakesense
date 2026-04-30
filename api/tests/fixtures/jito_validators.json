@@ -1,0 +1,37 @@
+{
+  "validators": [
+    {
+      "identity_account": "Id1",
+      "vote_account": "Vote111",
+      "mev_commission_bps": 500,
+      "mev_rewards": 12500000000,
+      "priority_fee_commission_bps": 500,
+      "priority_fee_rewards": 0,
+      "running_jito": true,
+      "running_bam": false,
+      "active_stake": 1500000000000
+    },
+    {
+      "identity_account": "Id2",
+      "vote_account": "Vote222",
+      "mev_commission_bps": 800,
+      "mev_rewards": 8200000000,
+      "priority_fee_commission_bps": 800,
+      "priority_fee_rewards": 0,
+      "running_jito": true,
+      "running_bam": false,
+      "active_stake": 800000000000
+    },
+    {
+      "identity_account": "Id3",
+      "vote_account": "Vote333",
+      "mev_commission_bps": 1000,
+      "mev_rewards": 0,
+      "priority_fee_commission_bps": 1000,
+      "priority_fee_rewards": 0,
+      "running_jito": true,
+      "running_bam": false,
+      "active_stake": 100000000000
+    }
+  ]
+}
