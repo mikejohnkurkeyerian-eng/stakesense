@@ -11,6 +11,7 @@ type Stats = {
   active_validators: number;
   latest_epoch: number | null;
   latest_prediction_date: string | null;
+  nakamoto_coefficient: number | null;
 };
 
 async function fetchStats(): Promise<Stats | null> {
@@ -92,7 +93,7 @@ export default async function Home() {
 
       {stats && (
         <section className="container mx-auto px-6 pb-16">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="border rounded-lg p-6 bg-white">
               <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">
                 Validators scored
@@ -106,12 +107,23 @@ export default async function Home() {
             </div>
             <div className="border rounded-lg p-6 bg-white">
               <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">
+                Nakamoto coeff
+              </div>
+              <div className="text-3xl font-bold">
+                {stats.nakamoto_coefficient ?? "—"}
+              </div>
+              <div className="text-xs text-slate-400 mt-1">
+                validators = ⅓ stake
+              </div>
+            </div>
+            <div className="border rounded-lg p-6 bg-white">
+              <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">
                 Avg downtime risk
               </div>
               <div className="text-3xl font-bold">
                 {pct(stats.avg_downtime_prob)}
               </div>
-              <div className="text-xs text-slate-400 mt-1">predicted, 7d horizon</div>
+              <div className="text-xs text-slate-400 mt-1">predicted, 7d</div>
             </div>
             <div className="border rounded-lg p-6 bg-white">
               <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">

@@ -89,8 +89,26 @@ def stats() -> dict:
           FROM latest
         """
     )
+    # Nakamoto coefficient: minimum number of top-stake validators whose combined
+    # stake exceeds 1/3 of total stake. Lower = more centralized; higher is better
+    # for Solana's halt-resistance.
+    nakamoto_sql = text(
+        """
+        WITH ordered AS (
+          SELECT active_stake, ROW_NUMBER() OVER (ORDER BY active_stake DESC) AS rk,
+                 SUM(active_stake) OVER (ORDER BY active_stake DESC) AS running_total,
+                 SUM(active_stake) OVER () AS total
+            FROM validators
+           WHERE active_stake IS NOT NULL AND active_stake > 0
+        )
+        SELECT MIN(rk) AS nakamoto_coefficient
+          FROM ordered
+         WHERE running_total > total / 3
+        """
+    )
     with engine.begin() as conn:
         row = conn.execute(sql).mappings().one()
+        nk = conn.execute(nakamoto_sql).scalar()
     return {
         "avg_mev_tax": float(row["avg_mev_tax"]) if row["avg_mev_tax"] is not None else None,
         "avg_downtime_prob": float(row["avg_downtime_prob"]) if row["avg_downtime_prob"] is not None else None,
@@ -100,6 +118,7 @@ def stats() -> dict:
         "active_validators": int(row["active_validators"]),
         "latest_epoch": int(row["latest_epoch"]) if row["latest_epoch"] is not None else None,
         "latest_prediction_date": str(row["latest_prediction_date"]) if row["latest_prediction_date"] else None,
+        "nakamoto_coefficient": int(nk) if nk is not None else None,
     }
 
 
