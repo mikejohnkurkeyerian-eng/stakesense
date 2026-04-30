@@ -33,7 +33,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .
 
-      - name: Refresh
+      - name: Refresh + retrain + predict
         env:
           HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
           HELIUS_RPC_URL: ${{ secrets.HELIUS_RPC_URL }}
@@ -44,4 +44,7 @@ jobs:
           PYTHONUNBUFFERED: "1"
         run: |
           python scripts/refresh_all.py
+          python scripts/train_downtime.py || echo "train_downtime non-fatal: insufficient history"
+          python scripts/train_mev_tax.py  || echo "train_mev_tax non-fatal: insufficient history"
+          python scripts/predict_today.py
           python scripts/data_quality.py
