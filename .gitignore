@@ -21,8 +21,8 @@ api/.env
 web/.env.local
 data/raw/
 data/processed/
-models/*.pkl
-models/*.joblib
+**/models/*.pkl
+**/models/*.joblib
 
 # Fly
 .fly/
