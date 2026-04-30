@@ -39,3 +39,14 @@ class SolanaRpcClient:
             "root_slot": entry.get("rootSlot"),
             "delinquent": delinquent,
         }
+
+    async def get_epoch_info(self) -> dict[str, Any]:
+        resp = await self._post({"jsonrpc": "2.0", "id": 1, "method": "getEpochInfo", "params": []})
+        return resp["result"]
+
+    async def get_block_production_current(self) -> dict[str, list[int]]:
+        """Return {identity_pubkey: [leader_slots, blocks_produced]} for the current epoch."""
+        resp = await self._post(
+            {"jsonrpc": "2.0", "id": 1, "method": "getBlockProduction", "params": []}
+        )
+        return resp["result"]["value"]["byIdentity"]
