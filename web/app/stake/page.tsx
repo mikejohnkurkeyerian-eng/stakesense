@@ -114,18 +114,59 @@ export default function StakePage() {
     !process.env.NEXT_PUBLIC_SOLANA_RPC ||
     process.env.NEXT_PUBLIC_SOLANA_RPC.includes("devnet");
 
+  async function airdropDevnet() {
+    if (!publicKey) return;
+    setError(null);
+    try {
+      const sig = await connection.requestAirdrop(
+        publicKey,
+        2 * LAMPORTS_PER_SOL
+      );
+      await connection.confirmTransaction(sig, "confirmed");
+    } catch (e) {
+      setError(
+        e instanceof Error
+          ? `Airdrop failed: ${e.message}. Try the public faucet at faucet.solana.com instead.`
+          : "Airdrop failed."
+      );
+    }
+  }
+
   return (
     <main className="container mx-auto p-6 max-w-3xl">
       <h1 className="text-3xl font-bold mb-2">Stake to a top validator</h1>
       <p className="text-slate-600 mb-6">
         Pick a risk profile, get our top-3 ranked picks, and delegate in one
-        click.{" "}
-        {isDevnet && (
-          <span className="text-amber-600 font-medium">
-            (Currently on devnet — use Phantom on devnet for testing.)
-          </span>
-        )}
+        click.
       </p>
+
+      {isDevnet && (
+        <div className="border-l-4 border-amber-500 bg-amber-50 p-4 rounded mb-6 text-sm">
+          <div className="font-semibold text-amber-900 mb-2">
+            ⚠ Currently running on Solana devnet
+          </div>
+          <ol className="list-decimal pl-5 space-y-1 text-amber-900">
+            <li>
+              Open Phantom → Settings → Developer Settings → Network →{" "}
+              <strong>Devnet</strong>
+            </li>
+            <li>
+              Connect below, then click <strong>Airdrop devnet SOL</strong> for
+              test funds (or use{" "}
+              <a
+                href="https://faucet.solana.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                faucet.solana.com
+              </a>
+              )
+            </li>
+            <li>Pick recs, click Stake — your test SOL gets delegated</li>
+          </ol>
+        </div>
+      )}
 
       <div className="border rounded-lg p-6 bg-white mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -166,19 +207,41 @@ export default function StakePage() {
             </button>
           </div>
         </div>
-        {!connected && (
-          <div className="text-sm text-slate-500 flex items-center gap-3">
-            <span>Connect a wallet to enable staking →</span>
-            <WalletMultiButton
-              style={{
-                background: "#0f172a",
-                borderRadius: "8px",
-                fontSize: "14px",
-                height: "36px",
-              }}
-            />
-          </div>
-        )}
+        <div className="flex flex-wrap gap-3 items-center text-sm">
+          {!connected ? (
+            <>
+              <span className="text-slate-500">
+                Connect a wallet to enable staking →
+              </span>
+              <WalletMultiButton
+                style={{
+                  background: "#0f172a",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  height: "36px",
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <span className="text-emerald-600 font-medium">
+                ✓ Wallet connected
+              </span>
+              <span className="font-mono text-xs text-slate-500">
+                {publicKey?.toBase58().slice(0, 4)}…
+                {publicKey?.toBase58().slice(-4)}
+              </span>
+              {isDevnet && (
+                <button
+                  onClick={airdropDevnet}
+                  className="ml-auto px-3 py-1.5 border rounded text-xs hover:bg-slate-50"
+                >
+                  Airdrop 2 devnet SOL
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {error && (
@@ -189,15 +252,20 @@ export default function StakePage() {
 
       {txSig && (
         <div className="border-l-4 border-emerald-500 bg-emerald-50 p-4 rounded mb-4 text-sm text-emerald-800">
-          Stake delegation submitted!{" "}
+          <div className="font-semibold mb-1">✓ Stake delegated</div>
           <a
             href={`https://explorer.solana.com/tx/${txSig}?cluster=${isDevnet ? "devnet" : "mainnet-beta"}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline font-mono break-all"
+            className="underline font-mono text-xs break-all"
           >
-            {txSig}
+            {txSig.slice(0, 24)}…
           </a>
+          <p className="mt-2 text-xs">
+            Your stake takes ~1 epoch (~2 days on mainnet, ~30 min on devnet)
+            to warm up before earning rewards. Manage it in Phantom under
+            Activity → Stake.
+          </p>
         </div>
       )}
 
