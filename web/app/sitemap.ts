@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/`, lastModified: now, priority: 1 },
     { url: `${SITE_URL}/validators`, lastModified: now, priority: 0.9 },
     { url: `${SITE_URL}/stake`, lastModified: now, priority: 0.8 },
+    { url: `${SITE_URL}/compare`, lastModified: now, priority: 0.7 },
     { url: `${SITE_URL}/backtest`, lastModified: now, priority: 0.7 },
     { url: `${SITE_URL}/methodology`, lastModified: now, priority: 0.6 },
   ];
