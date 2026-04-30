@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import type { Recommendation } from "@/lib/types";
+
 type Stats = {
   avg_mev_tax: number | null;
   avg_downtime_prob: number | null;
@@ -23,12 +25,39 @@ async function fetchStats(): Promise<Stats | null> {
   }
 }
 
+async function fetchTopPicks(): Promise<Recommendation[] | null> {
+  try {
+    const r = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/recommend`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount_sol: 100,
+          risk_profile: "balanced",
+          count: 3,
+        }),
+        next: { revalidate: 300 },
+      }
+    );
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j.recommendations as Recommendation[];
+  } catch {
+    return null;
+  }
+}
+
 function pct(x: number | null | undefined) {
   return x == null ? "—" : `${(x * 100).toFixed(1)}%`;
 }
 
+function shortPk(pk: string) {
+  return `${pk.slice(0, 4)}…${pk.slice(-4)}`;
+}
+
 export default async function Home() {
-  const stats = await fetchStats();
+  const [stats, picks] = await Promise.all([fetchStats(), fetchTopPicks()]);
   return (
     <main className="min-h-screen">
       <section className="container mx-auto px-6 py-20 text-center">
@@ -100,6 +129,75 @@ export default async function Home() {
                 {stats.latest_prediction_date ?? ""}
               </div>
             </div>
+          </div>
+        </section>
+      )}
+
+      {picks && picks.length > 0 && (
+        <section className="container mx-auto px-6 pb-16">
+          <div className="flex items-end justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold">Top picks right now</h2>
+              <p className="text-sm text-slate-500">
+                Balanced risk profile, recomputed every cron run. Click through
+                to delegate.
+              </p>
+            </div>
+            <Link
+              href="/stake"
+              className="text-sm text-blue-600 hover:underline"
+            >
+              See all picks + stake →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {picks.map((p, i) => (
+              <Link
+                key={p.vote_pubkey}
+                href={`/validators/${p.vote_pubkey}`}
+                className="border rounded-lg p-5 bg-white hover:border-violet-400 hover:shadow-md transition-all"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs uppercase tracking-wide text-violet-600 font-semibold">
+                    #{i + 1} pick
+                  </span>
+                  <span className="text-xs font-mono text-slate-400">
+                    {(p.composite_score ?? 0).toFixed(3)}
+                  </span>
+                </div>
+                <div className="font-semibold mb-1">
+                  {p.name ?? shortPk(p.vote_pubkey)}
+                </div>
+                <div className="text-xs font-mono text-slate-400 mb-3 break-all">
+                  {p.vote_pubkey}
+                </div>
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Downtime risk</span>
+                    <span className="font-medium">
+                      {pct(p.downtime_prob_7d)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">MEV tax</span>
+                    <span className="font-medium">{pct(p.mev_tax_rate)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Decentralization</span>
+                    <span className="font-medium">
+                      {(p.decentralization_score ?? 0).toFixed(3)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Commission</span>
+                    <span className="font-medium">{p.commission_pct ?? "—"}%</span>
+                  </div>
+                </div>
+                <div className="text-xs text-slate-500 mt-3 italic">
+                  {p.reasoning}
+                </div>
+              </Link>
+            ))}
           </div>
         </section>
       )}
