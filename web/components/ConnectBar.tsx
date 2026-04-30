@@ -28,6 +28,12 @@ export default function ConnectBar() {
             Stake
           </Link>
           <Link
+            href="/compare"
+            className="text-slate-600 hover:text-slate-900"
+          >
+            Compare
+          </Link>
+          <Link
             href="/backtest"
             className="text-slate-600 hover:text-slate-900"
           >
