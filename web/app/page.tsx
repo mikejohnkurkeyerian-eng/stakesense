@@ -77,6 +77,10 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ldjson) }}
       />
       <section className="container mx-auto px-6 py-20 text-center">
+        <div className="mb-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          Open-source · MIT · Public Goods tier · Solana Frontier 2026
+        </div>
         <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">
           Stake smarter.
           <br />
