@@ -16,10 +16,31 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_URL =
+  "https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app";
+
 export const metadata: Metadata = {
-  title: "stakesense — predictive validator scoring for Solana",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "stakesense — predictive validator scoring for Solana",
+    template: "%s · stakesense",
+  },
   description:
-    "ML-powered scoring on three pillars: predicted downtime risk, MEV-extracted-from-delegators, and decentralization impact.",
+    "ML-powered Solana validator scoring on three pillars: predicted downtime risk, MEV tax, and decentralization impact. Open-source, updated every epoch.",
+  openGraph: {
+    title: "stakesense — predictive validator scoring for Solana",
+    description:
+      "Open-source ML scoring of every Solana validator. Pick where to stake based on downtime risk, MEV tax, and decentralization impact.",
+    url: SITE_URL,
+    siteName: "stakesense",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "stakesense — predictive validator scoring for Solana",
+    description:
+      "Open-source ML scoring of every Solana validator. Pick where to stake.",
+  },
 };
 
 export default function RootLayout({
