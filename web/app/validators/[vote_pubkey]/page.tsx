@@ -18,12 +18,20 @@ export default async function Page({
 
   return (
     <main className="container mx-auto p-6">
-      <Link
-        href="/validators"
-        className="text-sm text-slate-500 hover:text-slate-900 mb-4 inline-block"
-      >
-        ← All validators
-      </Link>
+      <div className="flex items-center justify-between mb-4">
+        <Link
+          href="/validators"
+          className="text-sm text-slate-500 hover:text-slate-900"
+        >
+          ← All validators
+        </Link>
+        <Link
+          href={`/compare?vs=${p.vote_pubkey}`}
+          className="text-sm px-3 py-1.5 border rounded-lg hover:bg-slate-50"
+        >
+          Compare with another
+        </Link>
+      </div>
       <h1 className="text-3xl font-semibold mb-1">
         {v.name ?? shortPk(v.vote_pubkey)}
       </h1>
