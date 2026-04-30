@@ -80,4 +80,14 @@ def build_validator_features(
             "history_epochs": len(g),
         })
 
-    return pd.DataFrame(out)
+    result = pd.DataFrame(out)
+    # Ensure numeric columns are float (None -> NaN) so downstream LightGBM accepts them.
+    numeric_cols = [
+        "skip_rate_mean_5e", "skip_rate_std_5e", "skip_rate_trend_5e",
+        "vote_latency_mean_5e", "vote_latency_drift",
+        "credits_mean_5e", "active_stake_change_pct_5e", "history_epochs",
+    ]
+    for c in numeric_cols:
+        if c in result.columns:
+            result[c] = pd.to_numeric(result[c], errors="coerce")
+    return result
