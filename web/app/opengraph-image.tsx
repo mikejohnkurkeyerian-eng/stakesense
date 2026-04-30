@@ -1,6 +1,5 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
 export const alt = "stakesense — predictive validator scoring for Solana";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -20,7 +19,7 @@ export default async function OGImage() {
           color: "white",
         }}
       >
-        <div style={{ fontSize: 32, fontWeight: 700, opacity: 0.9 }}>
+        <div style={{ fontSize: 32, fontWeight: 700, opacity: 0.9, display: "flex" }}>
           stakesense
         </div>
         <div
@@ -29,19 +28,21 @@ export default async function OGImage() {
             fontWeight: 800,
             lineHeight: 1.05,
             marginTop: 80,
+            display: "flex",
+            flexDirection: "column",
           }}
         >
-          Stake smarter.
-          <br />
-          <span
+          <div style={{ display: "flex" }}>Stake smarter.</div>
+          <div
             style={{
+              display: "flex",
               background: "linear-gradient(to right, #a78bfa, #60a5fa)",
               backgroundClip: "text",
               color: "transparent",
             }}
           >
             Decentralize Solana.
-          </span>
+          </div>
         </div>
         <div
           style={{
@@ -49,6 +50,7 @@ export default async function OGImage() {
             marginTop: 40,
             opacity: 0.8,
             maxWidth: "70%",
+            display: "flex",
           }}
         >
           ML-powered scoring on three pillars: downtime risk, MEV tax,
@@ -63,9 +65,9 @@ export default async function OGImage() {
             opacity: 0.7,
           }}
         >
-          <span>● Live</span>
-          <span>● Open source</span>
-          <span>● Public Goods tier</span>
+          <span style={{ display: "flex" }}>● Live</span>
+          <span style={{ display: "flex" }}>● Open source</span>
+          <span style={{ display: "flex" }}>● Public Goods tier</span>
         </div>
       </div>
     ),
