@@ -126,7 +126,18 @@ export default function ValidatorsTable({
                   colSpan={6}
                   className="p-6 text-center text-slate-500 text-sm"
                 >
-                  No validators match {`"${query}"`}.
+                  No validators match {`"${query}"`} in the top {rows.length}.
+                  {query.length >= 32 && (
+                    <>
+                      {" "}
+                      <Link
+                        href={`/validators/${query.trim()}`}
+                        className="text-blue-600 hover:underline"
+                      >
+                        Look up directly →
+                      </Link>
+                    </>
+                  )}
                 </td>
               </tr>
             )}
