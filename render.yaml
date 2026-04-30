@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: stakesense-api
+    runtime: python
+    rootDir: api
+    plan: free
+    region: oregon
+    buildCommand: pip install -e .
+    startCommand: uvicorn stakesense.api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.10"
+      - key: DATABASE_URL
+        sync: false
+      - key: HELIUS_API_KEY
+        sync: false
+      - key: HELIUS_RPC_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: VALIDATORS_APP_TOKEN
+        sync: false
