@@ -59,8 +59,23 @@ function shortPk(pk: string) {
 
 export default async function Home() {
   const [stats, picks] = await Promise.all([fetchStats(), fetchTopPicks()]);
+  const ldjson = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "stakesense",
+    description:
+      "ML-powered Solana validator scoring on three pillars: predicted downtime risk, MEV tax, decentralization.",
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Web",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    license: "https://opensource.org/licenses/MIT",
+  };
   return (
     <main className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ldjson) }}
+      />
       <section className="container mx-auto px-6 py-20 text-center">
         <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">
           Stake smarter.
