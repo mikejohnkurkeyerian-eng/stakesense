@@ -27,6 +27,18 @@ export default function ConnectBar() {
           <Link href="/stake" className="text-slate-600 hover:text-slate-900">
             Stake
           </Link>
+          <Link
+            href="/backtest"
+            className="text-slate-600 hover:text-slate-900"
+          >
+            Backtest
+          </Link>
+          <Link
+            href="/methodology"
+            className="text-slate-600 hover:text-slate-900"
+          >
+            Methodology
+          </Link>
           <a
             href={`${process.env.NEXT_PUBLIC_API_BASE}/docs`}
             target="_blank"

@@ -7,11 +7,31 @@ from stakesense.db import engine
 
 router = APIRouter(prefix="/api/v1/validators", tags=["validators"])
 
-SORT_COL = {
-    "composite": "composite_score DESC",
-    "downtime": "downtime_prob_7d ASC",
-    "mev_tax": "mev_tax_rate ASC",
-    "decentralization": "decentralization_score DESC",
+# Primary sort + tie-breakers. Tie-breakers favor lower commission and validators
+# outside the top of the stake distribution (decentralization-positive). Without
+# this, many validators tie on identical pillar scores and the table looks flat
+# until validators.app metadata fills in.
+SORT_CLAUSE = {
+    "composite": (
+        "composite_score DESC NULLS LAST, "
+        "v.commission_pct ASC NULLS LAST, "
+        "v.active_stake ASC NULLS LAST"
+    ),
+    "downtime": (
+        "downtime_prob_7d ASC NULLS LAST, "
+        "composite_score DESC NULLS LAST, "
+        "v.commission_pct ASC NULLS LAST"
+    ),
+    "mev_tax": (
+        "mev_tax_rate ASC NULLS LAST, "
+        "v.commission_pct ASC NULLS LAST, "
+        "composite_score DESC NULLS LAST"
+    ),
+    "decentralization": (
+        "decentralization_score DESC NULLS LAST, "
+        "v.active_stake ASC NULLS LAST, "
+        "composite_score DESC NULLS LAST"
+    ),
 }
 
 
@@ -21,7 +41,7 @@ def list_validators(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
 ) -> dict:
-    sort_clause = SORT_COL[sort]
+    sort_clause = SORT_CLAUSE[sort]
     sql = text(
         f"""
         WITH latest AS (
