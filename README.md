@@ -6,9 +6,9 @@ Status: Days 1–7 ✅ — backend live, dashboard deploying, daily refresh cron
 
 ## Live
 
-- **API:** https://stakesense.onrender.com (FastAPI on Render free tier)
-- **Dashboard:** *(Vercel — link added when deploy completes)*
-- **Cron:** GitHub Actions, twice daily — refreshes data, retrains, writes new predictions
+- **API:** https://stakesense.onrender.com (FastAPI on Render free tier — cold-starts after 15 min idle)
+- **Dashboard:** https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app
+- **Cron:** GitHub Actions, twice daily (04:17 + 16:17 UTC) — refreshes data, retrains, writes new predictions
 
 ## Layout
 
