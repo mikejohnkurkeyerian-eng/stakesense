@@ -152,6 +152,42 @@ export const TOOLS: Tool[] = [
     },
   },
   {
+    name: "get_validator_rank",
+    description:
+      "Validator-side framing: where this validator sits in the network distribution. " +
+      "Returns rank by each pillar, percentile, the cutoff scores at top-10/50/100, and " +
+      "the gap to top-10/50. Useful for operator-perspective queries.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        vote_pubkey: {
+          type: "string",
+          description: "Validator vote account pubkey (base58)",
+        },
+      },
+      required: ["vote_pubkey"],
+    },
+  },
+  {
+    name: "get_recent_anomalies",
+    description:
+      "Validators whose state moved meaningfully between the last two observations. " +
+      "Detections include MEV commission jumps (≥5pp), newly delinquent operators, and " +
+      "composite-score moves ≥5pp. Sorted by absolute magnitude. Answer questions like " +
+      "'what changed in the validator set this week?'",
+    inputSchema: {
+      type: "object",
+      properties: {
+        limit: {
+          type: "integer",
+          description: "Max detections to return (default: 20, max: 100)",
+          minimum: 1,
+          maximum: 100,
+        },
+      },
+    },
+  },
+  {
     name: "health_check",
     description:
       "Lightweight ping — confirms the stakesense API is up and returns last update " +
@@ -209,6 +245,14 @@ export async function callTool(
     }
     case "get_network_stats": {
       return client.stats();
+    }
+    case "get_validator_rank": {
+      const pk = String(required(args, "vote_pubkey"));
+      return client.validatorRank(pk);
+    }
+    case "get_recent_anomalies": {
+      const limit = args.limit ? Number(args.limit) : 20;
+      return client.anomalies(limit);
     }
     case "health_check": {
       return client.health();

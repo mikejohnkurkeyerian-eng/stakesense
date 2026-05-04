@@ -25,17 +25,38 @@ function makeFakeClient(): StakesenseClient {
       clusters: { data_center: [], asn: [], country: [] },
     }),
     exportManifest: vi.fn().mockResolvedValue({ exports: [] }),
+    validatorRank: vi.fn().mockResolvedValue({
+      vote_pubkey: "abc",
+      total_validators: 789,
+      rank_composite: 5,
+      rank_downtime: 8,
+      rank_mev_tax: 3,
+      rank_decentralization: 200,
+      percentile_composite: 0.99,
+      current_composite: 0.95,
+      current_downtime_prob: 0.05,
+      current_mev_tax: 0.04,
+      current_decentralization: 0.6,
+      cutoff_top10_composite: 0.96,
+      cutoff_top50_composite: 0.92,
+      cutoff_top100_composite: 0.88,
+      gap_to_top10: 0.01,
+      gap_to_top50: -0.03,
+    }),
+    anomalies: vi.fn().mockResolvedValue({ detections: [] }),
   } as unknown as StakesenseClient;
 }
 
 describe("TOOLS catalog", () => {
-  it("exposes the eight expected tools", () => {
+  it("exposes the ten expected tools", () => {
     const names = TOOLS.map((t) => t.name).sort();
     expect(names).toEqual([
       "get_concentration_by",
       "get_decentralization_report",
       "get_network_stats",
+      "get_recent_anomalies",
       "get_validator_history",
+      "get_validator_rank",
       "get_validator_score",
       "health_check",
       "list_validators",
@@ -130,6 +151,19 @@ describe("callTool dispatch", () => {
     await expect(
       callTool(c, "get_validator_score", {}),
     ).rejects.toThrow(/missing required argument: vote_pubkey/);
+  });
+
+  it("get_validator_rank routes to client.validatorRank", async () => {
+    const c = makeFakeClient();
+    const out = await callTool(c, "get_validator_rank", { vote_pubkey: "abc" });
+    expect(c.validatorRank).toHaveBeenCalledWith("abc");
+    expect((out as { rank_composite: number }).rank_composite).toBe(5);
+  });
+
+  it("get_recent_anomalies default limit is 20", async () => {
+    const c = makeFakeClient();
+    await callTool(c, "get_recent_anomalies", {});
+    expect(c.anomalies).toHaveBeenCalledWith(20);
   });
 
   it("unknown tool throws", async () => {

@@ -91,6 +91,14 @@ export class StakesenseClient {
   exportManifest(): Promise<ExportManifest> {
     return this.get("/api/v1/export/manifest.json");
   }
+
+  validatorRank(votePubkey: string): Promise<RankResponse> {
+    return this.get(`/api/v1/validators/${encodeURIComponent(votePubkey)}/rank`);
+  }
+
+  anomalies(limit = 20): Promise<AnomaliesResponse> {
+    return this.get(`/api/v1/anomalies?limit=${limit}`);
+  }
 }
 
 // ----- Types (mirror the REST shapes) -----
@@ -201,4 +209,37 @@ export interface ExportManifest {
     refresh: string;
     fields: string[];
   }>;
+}
+
+export interface RankResponse {
+  vote_pubkey: string;
+  total_validators: number;
+  rank_composite: number;
+  rank_downtime: number;
+  rank_mev_tax: number;
+  rank_decentralization: number;
+  percentile_composite: number | null;
+  current_composite: number | null;
+  current_downtime_prob: number | null;
+  current_mev_tax: number | null;
+  current_decentralization: number | null;
+  cutoff_top10_composite: number | null;
+  cutoff_top50_composite: number | null;
+  cutoff_top100_composite: number | null;
+  gap_to_top10: number | null;
+  gap_to_top50: number | null;
+}
+
+export interface AnomalyDetection {
+  kind: string;
+  vote_pubkey: string;
+  name: string | null;
+  magnitude: number;
+  summary: string;
+  epoch?: number;
+  current_date?: string;
+}
+
+export interface AnomaliesResponse {
+  detections: AnomalyDetection[];
 }
