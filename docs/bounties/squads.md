@@ -23,14 +23,15 @@ Stakesense scores every active Solana validator on three pillars (downtime risk,
 3. **Open data exports** — DAOs that want to build internal staking dashboards can pull `predictions.csv` directly under CC-BY 4.0
 4. **Embeddable widget** — drops a stakesense score into Squads UI add-ons or DAO governance forums
 
-**Roadmap (post-hackathon, with Squads bounty support):**
+**Shipped: `/stake/multisig` — generic multisig stake-tx generator.** A read-only page that:
 
-A `/stake/dao` flow that constructs Squads-V4-compatible stake creation + delegation transactions. The user inputs:
-- Their multisig pubkey
-- A recommended validator (from stakesense)
-- Stake amount
+1. Takes a multisig vault pubkey + amount + network (devnet / mainnet-beta)
+2. Pulls stakesense-recommended validators
+3. Constructs a stake-account creation + delegation transaction with the vault as the staker authority
+4. Partial-signs with the new stake-account keypair so the multisig only needs to add its own approvals
+5. Outputs the transaction in base58 + base64 — paste into Squads, Realms, or any multisig UI that accepts raw transactions
 
-The page generates a serialized transaction blob the user can paste into the Squads UI to propose to their council. Combined with stakesense's risk warnings, this is "automated treasury manager" tooling for Solana DAOs without requiring DAOs to take a custody position.
+This works **today** with Squads V4 multisigs. Full Squads-native UI integration (proposal SDK, deep-link to approval screen) is the natural next sprint with bounty support.
 
 ## Why DAOs need this
 
@@ -43,6 +44,7 @@ For Squads specifically:
 
 ## Code references
 
+- **Multisig stake-tx generator:** `web/app/stake/multisig/page.tsx`
 - Portfolio analyzer (works with any pubkey including multisig vaults): `web/app/portfolio/page.tsx`, `api/src/stakesense/api/routers/portfolio.py`, `api/src/stakesense/scoring/portfolio.py`
 - Stake account discovery via RPC: `api/src/stakesense/sources/stake_accounts.py`
 - MCP server: `mcp/src/`
@@ -50,18 +52,20 @@ For Squads specifically:
 
 ## What we'd build with the bounty
 
-1. **`/stake/dao` flow** — Squads V4 SDK integration. Construct stake-create + delegate transactions with the multisig vault as the staker authority. Output: serialized tx + a "Open in Squads" link
+1. **Native Squads V4 SDK integration** — replace the paste-the-blob flow with direct proposal creation via the Squads SDK; deep-link into the approval screen
 2. **DAO council dashboard** — invite the multisig council, share a link, every member sees the same risk dashboard before voting
 3. **Policy templates** — "max 50% in one data center", "no superminority validators", "weighted composite > 0.7" — codified as policy rules that fail validation if a proposal violates them
 4. **Audit log** — every delegate / undelegate proposal cross-referenced against the validator's stakesense score *at the time of decision*, so DAOs can audit treasury performance retroactively
 
-## Demo (current state) for judges
+## Demo for judges
 
-1. Open https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/portfolio
-2. Paste a Squads vault address (any multisig PDA)
-3. The dashboard analyzes the treasury's existing delegations, scores each, surfaces concentration, and suggests rebalances
+**Portfolio analysis:**
+1. Open `/portfolio`, paste a Squads vault PDA
+2. See risk-scored treasury, concentration warnings, rebalance suggestions
 
-(For the full `/stake/dao` flow with Squads-native tx construction, see the roadmap above — it's the next sprint after submission.)
+**Stake creation:**
+1. Open `/stake/multisig`, paste vault, pick a stakesense-recommended validator, set amount
+2. Copy the generated base58 blob → open Squads → import as raw transaction → submit to council
 
 ## License
 
