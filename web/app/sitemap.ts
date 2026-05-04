@@ -20,5 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/research`, lastModified: now, priority: 0.7 },
     { url: `${SITE_URL}/alerts`, lastModified: now, priority: 0.7 },
     { url: `${SITE_URL}/sponsors`, lastModified: now, priority: 0.5 },
+    { url: `${SITE_URL}/changelog`, lastModified: now, priority: 0.4 },
+    { url: `${SITE_URL}/stake/multisig`, lastModified: now, priority: 0.6 },
   ];
 }

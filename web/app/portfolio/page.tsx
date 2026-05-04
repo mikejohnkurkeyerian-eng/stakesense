@@ -67,6 +67,24 @@ function shortPk(pk: string) {
   return `${pk.slice(0, 4)}…${pk.slice(-4)}`;
 }
 
+// Sample wallets that demonstrate the analyzer in action. These are public
+// addresses that appear in publicly known stake-distribution reports — used
+// for read-only display only, no transactions are constructed against them.
+const SAMPLE_WALLETS: { label: string; pubkey: string }[] = [
+  {
+    label: "Solana Foundation",
+    pubkey: "Hp8eJgxgZuVrcxgzKdLxeTM1dCFr4ZaXJV1DfkhSRWyD",
+  },
+  {
+    label: "Marinade authority",
+    pubkey: "8szGkuLTAux9XMgZ2vtY39jVSowEcpBfFfD8hXSEqdGC",
+  },
+  {
+    label: "Random small staker",
+    pubkey: "5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9",
+  },
+];
+
 function severityClasses(s: Warning["severity"]) {
   return s === "high"
     ? "border-red-300 bg-red-50 text-red-900"
@@ -162,6 +180,22 @@ export default function PortfolioPage() {
               }}
             />
           )}
+        </div>
+        <div className="flex flex-wrap gap-2 items-center mt-3 text-xs">
+          <span className="text-slate-500">Try a sample:</span>
+          {SAMPLE_WALLETS.map((s) => (
+            <button
+              key={s.pubkey}
+              onClick={() => {
+                setInput(s.pubkey);
+                fetchReport(s.pubkey);
+              }}
+              className="px-2 py-1 border border-slate-300 rounded hover:bg-slate-50 font-mono text-xs"
+              title={s.label}
+            >
+              {s.label}
+            </button>
+          ))}
         </div>
         <p className="text-xs text-slate-500 mt-3">
           Read-only — no signing required. We only call public Solana RPC to
