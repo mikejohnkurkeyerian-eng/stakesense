@@ -119,12 +119,20 @@ export default async function Page({
         >
           ← All validators
         </Link>
-        <Link
-          href={`/compare?vs=${p.vote_pubkey}`}
-          className="text-sm px-3 py-1.5 border rounded-lg hover:bg-slate-50"
-        >
-          Compare with another
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href={`/operator/${p.vote_pubkey}`}
+            className="text-sm px-3 py-1.5 border border-emerald-300 bg-emerald-50 text-emerald-900 rounded-lg hover:bg-emerald-100"
+          >
+            Operator view
+          </Link>
+          <Link
+            href={`/compare?vs=${p.vote_pubkey}`}
+            className="text-sm px-3 py-1.5 border rounded-lg hover:bg-slate-50"
+          >
+            Compare with another
+          </Link>
+        </div>
       </div>
       <h1 className="text-3xl font-semibold mb-1">
         {v.name ?? shortPk(v.vote_pubkey)}

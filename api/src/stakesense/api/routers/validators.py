@@ -167,6 +167,105 @@ def predictions_history(vote_pubkey: str, limit: int = Query(30, ge=1, le=180)) 
     return {"vote_pubkey": vote_pubkey, "history": rows}
 
 
+@router.get("/{vote_pubkey}/rank")
+def validator_rank(vote_pubkey: str) -> dict:
+    """Where does this validator sit in the distribution?
+
+    Returns rank (1 = best) by composite, downtime, mev_tax, decentralization,
+    plus the value at the rank-10 / rank-50 cutoffs so an operator can see
+    the gap they need to close.
+    """
+    rank_sql = text(
+        """
+        WITH latest AS (
+          SELECT DISTINCT ON (p.vote_pubkey) p.*
+            FROM predictions p
+           ORDER BY p.vote_pubkey, p.prediction_date DESC
+        ),
+        ranked AS (
+          SELECT vote_pubkey,
+                 composite_score,
+                 downtime_prob_7d,
+                 mev_tax_rate,
+                 decentralization_score,
+                 RANK() OVER (ORDER BY composite_score DESC NULLS LAST) AS rank_composite,
+                 RANK() OVER (ORDER BY downtime_prob_7d ASC NULLS LAST) AS rank_downtime,
+                 RANK() OVER (ORDER BY mev_tax_rate ASC NULLS LAST) AS rank_mev_tax,
+                 RANK() OVER (ORDER BY decentralization_score DESC NULLS LAST) AS rank_decentralization,
+                 COUNT(*) OVER () AS total
+            FROM latest
+        )
+        SELECT *
+          FROM ranked
+         WHERE vote_pubkey = :pk
+        """
+    )
+    cutoffs_sql = text(
+        """
+        WITH latest AS (
+          SELECT DISTINCT ON (p.vote_pubkey) p.*
+            FROM predictions p
+           ORDER BY p.vote_pubkey, p.prediction_date DESC
+        ),
+        ordered AS (
+          SELECT composite_score,
+                 ROW_NUMBER() OVER (ORDER BY composite_score DESC NULLS LAST) AS rk
+            FROM latest
+        )
+        SELECT
+          (SELECT composite_score FROM ordered WHERE rk = 10) AS top10,
+          (SELECT composite_score FROM ordered WHERE rk = 50) AS top50,
+          (SELECT composite_score FROM ordered WHERE rk = 100) AS top100
+        """
+    )
+    with engine.begin() as conn:
+        row = conn.execute(rank_sql, {"pk": vote_pubkey}).mappings().fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="not found")
+        cutoffs = conn.execute(cutoffs_sql).mappings().fetchone() or {}
+    total = int(row["total"])
+    composite = _f(row["composite_score"])
+    return {
+        "vote_pubkey": vote_pubkey,
+        "total_validators": total,
+        "rank_composite": int(row["rank_composite"]),
+        "rank_downtime": int(row["rank_downtime"]),
+        "rank_mev_tax": int(row["rank_mev_tax"]),
+        "rank_decentralization": int(row["rank_decentralization"]),
+        "percentile_composite": _percentile(int(row["rank_composite"]), total),
+        "current_composite": composite,
+        "current_downtime_prob": _f(row["downtime_prob_7d"]),
+        "current_mev_tax": _f(row["mev_tax_rate"]),
+        "current_decentralization": _f(row["decentralization_score"]),
+        "cutoff_top10_composite": _f(cutoffs.get("top10")),
+        "cutoff_top50_composite": _f(cutoffs.get("top50")),
+        "cutoff_top100_composite": _f(cutoffs.get("top100")),
+        "gap_to_top10": _gap(composite, _f(cutoffs.get("top10"))),
+        "gap_to_top50": _gap(composite, _f(cutoffs.get("top50"))),
+    }
+
+
+def _f(v):
+    if v is None:
+        return None
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _percentile(rank: int, total: int) -> float | None:
+    if total <= 0:
+        return None
+    return round(1 - (rank - 1) / total, 4)
+
+
+def _gap(current: float | None, cutoff: float | None) -> float | None:
+    if current is None or cutoff is None:
+        return None
+    return round(cutoff - current, 4)
+
+
 @router.get("/{vote_pubkey}")
 def get_validator(vote_pubkey: str) -> dict:
     sql = text(
