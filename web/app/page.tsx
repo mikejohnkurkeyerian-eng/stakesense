@@ -387,6 +387,24 @@ export default async function Home() {
             blurb="Strategy performance over historical predictions"
             tone="slate"
           />
+          <SurfaceCard
+            href="/playground"
+            title="API playground"
+            blurb="Interactive explorer for every public endpoint"
+            tone="violet"
+          />
+          <SurfaceCard
+            href="/stake/multisig"
+            title="Multisig staking"
+            blurb="Squads / Realms-compatible stake-tx generator"
+            tone="emerald"
+          />
+          <SurfaceCard
+            href="/changelog"
+            title="Changelog"
+            blurb="From git init to public-goods oracle in 6 days"
+            tone="slate"
+          />
         </div>
       </section>
 
