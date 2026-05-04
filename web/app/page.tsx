@@ -26,6 +26,28 @@ async function fetchStats(): Promise<Stats | null> {
   }
 }
 
+type Anomaly = {
+  kind: string;
+  vote_pubkey: string;
+  name: string | null;
+  summary: string;
+  magnitude: number;
+};
+
+async function fetchAnomalies(): Promise<Anomaly[]> {
+  try {
+    const r = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/anomalies?limit=4`,
+      { next: { revalidate: 600 } }
+    );
+    if (!r.ok) return [];
+    const j = await r.json();
+    return (j.detections || []) as Anomaly[];
+  } catch {
+    return [];
+  }
+}
+
 async function fetchTopPicks(): Promise<Recommendation[] | null> {
   try {
     const r = await fetch(
@@ -55,6 +77,22 @@ function pct(x: number | null | undefined) {
 
 function shortPk(pk: string) {
   return `${pk.slice(0, 4)}…${pk.slice(-4)}`;
+}
+
+function anomalyClass(kind: string) {
+  if (kind === "newly_delinquent") return "bg-red-100 text-red-900";
+  if (kind === "composite_drop") return "bg-orange-100 text-orange-900";
+  if (kind === "composite_climb") return "bg-emerald-100 text-emerald-900";
+  if (kind === "mev_commission_change") return "bg-amber-100 text-amber-900";
+  return "bg-slate-100 text-slate-900";
+}
+
+function anomalyLabel(kind: string) {
+  if (kind === "newly_delinquent") return "DELINQUENT";
+  if (kind === "composite_drop") return "DROP";
+  if (kind === "composite_climb") return "CLIMB";
+  if (kind === "mev_commission_change") return "MEV Δ";
+  return kind;
 }
 
 function SurfaceCard({
@@ -88,7 +126,11 @@ function SurfaceCard({
 }
 
 export default async function Home() {
-  const [stats, picks] = await Promise.all([fetchStats(), fetchTopPicks()]);
+  const [stats, picks, anomalies] = await Promise.all([
+    fetchStats(),
+    fetchTopPicks(),
+    fetchAnomalies(),
+  ]);
   const ldjson = {
     "@context": "https://schema.org",
     "@graph": [
@@ -327,6 +369,44 @@ export default async function Home() {
                 <div className="text-xs text-slate-500 mt-3 italic">
                   {p.reasoning}
                 </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {anomalies.length > 0 && (
+        <section className="container mx-auto px-6 pb-16">
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-bold">What changed recently</h2>
+              <p className="text-sm text-slate-500">
+                Top movers from the latest cron run. See all on{" "}
+                <Link href="/alerts" className="text-violet-700 underline">
+                  /alerts
+                </Link>
+                .
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {anomalies.slice(0, 4).map((a) => (
+              <Link
+                key={`${a.kind}-${a.vote_pubkey}`}
+                href={`/validators/${a.vote_pubkey}`}
+                className="border rounded-lg p-4 bg-white hover:border-violet-400 hover:shadow-sm transition-all"
+              >
+                <div className="flex items-start gap-2 mb-2">
+                  <span
+                    className={`px-2 py-0.5 rounded text-xs font-bold flex-shrink-0 ${anomalyClass(a.kind)}`}
+                  >
+                    {anomalyLabel(a.kind)}
+                  </span>
+                  <span className="font-medium text-slate-900 text-sm">
+                    {a.name || shortPk(a.vote_pubkey)}
+                  </span>
+                </div>
+                <div className="text-xs text-slate-600">{a.summary}</div>
               </Link>
             ))}
           </div>
