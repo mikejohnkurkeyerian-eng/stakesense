@@ -8,6 +8,96 @@ function shortPk(pk: string) {
   return `${pk.slice(0, 4)}…${pk.slice(-4)}`;
 }
 
+function ScoreBreakdown({
+  downtime,
+  mev_tax,
+  decentralization,
+  composite,
+}: {
+  downtime: number | null;
+  mev_tax: number | null;
+  decentralization: number | null;
+  composite: number;
+}) {
+  const downtimeContrib = downtime != null ? 0.5 * (1 - downtime) : null;
+  const mevContrib = mev_tax != null ? 0.3 * (1 - mev_tax) : null;
+  const decContrib = decentralization != null ? 0.2 * decentralization : null;
+  const max = composite || 0.001;
+  return (
+    <div className="space-y-3">
+      <BreakdownRow
+        label="Downtime pillar (50% weight)"
+        formula={
+          downtime != null
+            ? `0.5 × (1 − ${(downtime * 100).toFixed(1)}%) = ${
+                downtimeContrib != null ? (downtimeContrib * 100).toFixed(1) + "%" : "—"
+              }`
+            : "—"
+        }
+        value={downtimeContrib}
+        max={max}
+        color="bg-violet-500"
+      />
+      <BreakdownRow
+        label="MEV-tax pillar (30% weight)"
+        formula={
+          mev_tax != null
+            ? `0.3 × (1 − ${(mev_tax * 100).toFixed(1)}%) = ${
+                mevContrib != null ? (mevContrib * 100).toFixed(1) + "%" : "—"
+              }`
+            : "—"
+        }
+        value={mevContrib}
+        max={max}
+        color="bg-blue-500"
+      />
+      <BreakdownRow
+        label="Decentralization pillar (20% weight)"
+        formula={
+          decentralization != null
+            ? `0.2 × ${(decentralization * 100).toFixed(1)}% = ${
+                decContrib != null ? (decContrib * 100).toFixed(1) + "%" : "—"
+              }`
+            : "—"
+        }
+        value={decContrib}
+        max={max}
+        color="bg-emerald-500"
+      />
+    </div>
+  );
+}
+
+function BreakdownRow({
+  label,
+  formula,
+  value,
+  max,
+  color,
+}: {
+  label: string;
+  formula: string;
+  value: number | null;
+  max: number;
+  color: string;
+}) {
+  const pct = value != null && max > 0 ? Math.min(100, (value / max) * 100) : 0;
+  return (
+    <div>
+      <div className="flex justify-between text-sm mb-1">
+        <span className="text-slate-700">{label}</span>
+        <span className="text-slate-500 font-mono text-xs">{formula}</span>
+      </div>
+      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+        <div
+          className={`h-full ${color} rounded-full`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default async function Page({
   params,
 }: {
@@ -69,6 +159,38 @@ export default async function Page({
           </div>
         </div>
       </div>
+
+      {v.composite_score != null && (
+        <section className="mb-8 border rounded-lg p-5 bg-white">
+          <h2 className="text-xl font-semibold mb-2">
+            Composite score breakdown
+          </h2>
+          <p className="text-sm text-slate-600 mb-4">
+            How this validator&apos;s composite of{" "}
+            <span className="font-bold text-slate-900">
+              {(v.composite_score * 100).toFixed(1)}%
+            </span>{" "}
+            decomposes:
+          </p>
+          <ScoreBreakdown
+            downtime={v.downtime_prob_7d}
+            mev_tax={v.mev_tax_rate}
+            decentralization={v.decentralization_score}
+            composite={v.composite_score}
+          />
+          <p className="text-xs text-slate-500 mt-4">
+            Formula:{" "}
+            <code className="bg-slate-100 px-1.5 py-0.5 rounded">
+              0.5·(1−downtime) + 0.3·(1−mev_tax) + 0.2·decentralization
+            </code>
+            . Read the{" "}
+            <Link href="/methodology" className="text-violet-700 underline">
+              methodology
+            </Link>{" "}
+            for the why behind each weight.
+          </p>
+        </section>
+      )}
 
       {predHistory && (
         <>
