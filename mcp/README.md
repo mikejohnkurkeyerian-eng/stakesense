@@ -17,9 +17,11 @@ Eight tools and five resources, all backed by the public stakesense REST API:
 | `recommend_top_validators` | "Where should I stake N SOL?" — ranked list with reasoning |
 | `list_validators` | Browse top of any pillar (composite / downtime / mev_tax / decentralization) |
 | `get_validator_history` | "Is this validator getting better or worse?" — score trajectory |
+| `get_validator_rank` | Where a validator ranks + gap to top-10/50 (operator-side framing) |
 | `get_decentralization_report` | Network-wide Nakamoto coefficient + ASN/data-center/country breakdowns |
 | `get_concentration_by` | Top clusters along one axis (data_center / asn / country) |
 | `get_network_stats` | Global summary (averages, latest epoch, validator count) |
+| `get_recent_anomalies` | What changed in the validator set this week (MEV jumps, delinquency, score moves) |
 | `health_check` | API liveness + last refresh timestamp |
 
 ### Resources (read-once context)

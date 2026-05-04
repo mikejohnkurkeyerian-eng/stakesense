@@ -25,6 +25,10 @@ const TOOLS = [
     purpose: "Score trajectory over time",
   },
   {
+    name: "get_validator_rank",
+    purpose: "Where this validator ranks + gap to top-10",
+  },
+  {
     name: "get_decentralization_report",
     purpose: "Network Nakamoto coefficient + clusters",
   },
@@ -35,6 +39,10 @@ const TOOLS = [
   {
     name: "get_network_stats",
     purpose: "Global averages + latest epoch",
+  },
+  {
+    name: "get_recent_anomalies",
+    purpose: "What changed in the validator set this week",
   },
   {
     name: "health_check",
