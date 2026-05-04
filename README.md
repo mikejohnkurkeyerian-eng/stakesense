@@ -23,6 +23,13 @@
 | About | [/about](https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/about) |
 | Open data | [/data](https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/data) |
 | MCP integration | [/integrations/mcp](https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/integrations/mcp) |
+| Embeddable widget | [/widget](https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/widget) |
+| Network research | [/research](https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/research) |
+| Recent changes | [/alerts](https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/alerts) |
+| Multisig staking | [/stake/multisig](https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/stake/multisig) |
+| Operator view | /operator/[vote_pubkey] |
+| Sponsors / attribution | [/sponsors](https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/sponsors) |
+| Changelog | [/changelog](https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/changelog) |
 | REST API | https://stakesense.onrender.com/docs |
 | Model Card | [MODEL_CARD.md](MODEL_CARD.md) |
 | Methodology paper | [docs/METHODOLOGY.md](docs/METHODOLOGY.md) |
