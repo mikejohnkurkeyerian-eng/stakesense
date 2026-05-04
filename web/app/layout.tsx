@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import ConnectBar from "@/components/ConnectBar";
@@ -42,6 +42,11 @@ export const metadata: Metadata = {
     description:
       "Open-source ML scoring of every Solana validator. Pick where to stake.",
   },
+  manifest: "/manifest.webmanifest",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#8b5cf6",
 };
 
 export default function RootLayout({
