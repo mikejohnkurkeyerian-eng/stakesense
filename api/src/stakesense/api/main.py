@@ -6,6 +6,7 @@ from slowapi.util import get_remote_address
 from sqlalchemy import text
 
 from stakesense.api.routers import backtest as backtest_router
+from stakesense.api.routers import export as export_router
 from stakesense.api.routers import recommend as recommend_router
 from stakesense.api.routers import validators as validators_router
 from stakesense.db import engine
@@ -42,3 +43,4 @@ def health() -> dict:
 app.include_router(validators_router.router)
 app.include_router(recommend_router.router)
 app.include_router(backtest_router.router)
+app.include_router(export_router.router)

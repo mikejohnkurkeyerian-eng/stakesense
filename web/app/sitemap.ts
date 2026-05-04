@@ -12,5 +12,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/compare`, lastModified: now, priority: 0.7 },
     { url: `${SITE_URL}/backtest`, lastModified: now, priority: 0.7 },
     { url: `${SITE_URL}/methodology`, lastModified: now, priority: 0.6 },
+    { url: `${SITE_URL}/about`, lastModified: now, priority: 0.6 },
+    { url: `${SITE_URL}/data`, lastModified: now, priority: 0.7 },
+    { url: `${SITE_URL}/portfolio`, lastModified: now, priority: 0.8 },
+    { url: `${SITE_URL}/integrations/mcp`, lastModified: now, priority: 0.6 },
   ];
 }
