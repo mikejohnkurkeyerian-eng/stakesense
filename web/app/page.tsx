@@ -57,6 +57,36 @@ function shortPk(pk: string) {
   return `${pk.slice(0, 4)}…${pk.slice(-4)}`;
 }
 
+function SurfaceCard({
+  href,
+  title,
+  blurb,
+  tone,
+}: {
+  href: string;
+  title: string;
+  blurb: string;
+  tone: "emerald" | "violet" | "blue" | "slate" | "amber" | "red";
+}) {
+  const toneClasses: Record<string, string> = {
+    emerald: "border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50",
+    violet: "border-violet-200 hover:border-violet-400 hover:bg-violet-50",
+    blue: "border-blue-200 hover:border-blue-400 hover:bg-blue-50",
+    slate: "border-slate-200 hover:border-slate-400 hover:bg-slate-50",
+    amber: "border-amber-200 hover:border-amber-400 hover:bg-amber-50",
+    red: "border-red-200 hover:border-red-400 hover:bg-red-50",
+  };
+  return (
+    <Link
+      href={href}
+      className={`border rounded-lg p-4 bg-white transition-all ${toneClasses[tone]}`}
+    >
+      <div className="font-semibold text-slate-900 mb-1">{title} →</div>
+      <div className="text-xs text-slate-600">{blurb}</div>
+    </Link>
+  );
+}
+
 export default async function Home() {
   const [stats, picks] = await Promise.all([fetchStats(), fetchTopPicks()]);
   const ldjson = {
@@ -302,6 +332,63 @@ export default async function Home() {
           </div>
         </section>
       )}
+
+      <section className="container mx-auto px-6 pb-16">
+        <h2 className="text-2xl font-bold mb-1">More ways to use stakesense</h2>
+        <p className="text-sm text-slate-500 mb-6">
+          The same predictions, surfaced wherever you work.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <SurfaceCard
+            href="/portfolio"
+            title="Portfolio analyzer"
+            blurb="Paste any wallet → see exposure + rebalance suggestions"
+            tone="emerald"
+          />
+          <SurfaceCard
+            href="/integrations/mcp"
+            title="MCP server"
+            blurb="Claude Desktop / Cursor query stakesense natively"
+            tone="violet"
+          />
+          <SurfaceCard
+            href="/widget"
+            title="Embeddable widget"
+            blurb="Drop a score on any Solana site with one <script>"
+            tone="blue"
+          />
+          <SurfaceCard
+            href="/data"
+            title="Open data exports"
+            blurb="Daily CSV/JSON snapshots, CC-BY 4.0"
+            tone="slate"
+          />
+          <SurfaceCard
+            href="/research"
+            title="Research dashboard"
+            blurb="Live decentralization stats + top clusters"
+            tone="amber"
+          />
+          <SurfaceCard
+            href="/alerts"
+            title="Recent changes"
+            blurb="MEV jumps, delinquencies, score movers"
+            tone="red"
+          />
+          <SurfaceCard
+            href="/compare"
+            title="Side-by-side compare"
+            blurb="Two validators across all three pillars"
+            tone="slate"
+          />
+          <SurfaceCard
+            href="/backtest"
+            title="Backtest"
+            blurb="Strategy performance over historical predictions"
+            tone="slate"
+          />
+        </div>
+      </section>
 
       <section className="container mx-auto px-6 pb-20">
         <h2 className="text-3xl font-bold mb-8 text-center">How it works</h2>
