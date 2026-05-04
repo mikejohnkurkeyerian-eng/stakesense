@@ -1,0 +1,59 @@
+{
+  "name": "stakesense-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for stakesense — predictive Solana validator quality scoring. Lets Claude Desktop, Claude Code, and Cursor query validator scores, recommendations, and decentralization data natively.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "solana",
+    "validators",
+    "staking",
+    "claude",
+    "cursor"
+  ],
+  "homepage": "https://github.com/mikejohnkurkeyerian-eng/stakesense#readme",
+  "bugs": {
+    "url": "https://github.com/mikejohnkurkeyerian-eng/stakesense/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikejohnkurkeyerian-eng/stakesense.git",
+    "directory": "mcp"
+  },
+  "license": "MIT",
+  "author": "Mike <mikejohnkurkeyerian@gmail.com>",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "stakesense-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

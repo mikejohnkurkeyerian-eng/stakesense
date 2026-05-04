@@ -151,6 +151,12 @@ export default async function Home() {
           >
             Browse validators
           </Link>
+          <Link
+            href="/integrations/mcp"
+            className="px-6 py-3 border border-violet-300 bg-violet-50 text-violet-900 rounded-lg hover:bg-violet-100 font-medium"
+          >
+            MCP server ↗
+          </Link>
           <a
             href={`${process.env.NEXT_PUBLIC_API_BASE}/docs`}
             target="_blank"
@@ -160,6 +166,12 @@ export default async function Home() {
             API docs ↗
           </a>
         </div>
+        <p className="text-xs text-slate-500 mt-6">
+          Or query stakesense from Claude / Cursor:{" "}
+          <code className="bg-slate-100 px-2 py-0.5 rounded font-mono">
+            claude mcp add stakesense -- npx stakesense-mcp
+          </code>
+        </p>
       </section>
 
       {stats && (
