@@ -152,6 +152,12 @@ export default async function Home() {
             Browse validators
           </Link>
           <Link
+            href="/portfolio"
+            className="px-6 py-3 border border-emerald-300 bg-emerald-50 text-emerald-900 rounded-lg hover:bg-emerald-100 font-medium"
+          >
+            Analyze your wallet ↗
+          </Link>
+          <Link
             href="/integrations/mcp"
             className="px-6 py-3 border border-violet-300 bg-violet-50 text-violet-900 rounded-lg hover:bg-violet-100 font-medium"
           >
