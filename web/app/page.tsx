@@ -61,14 +61,66 @@ export default async function Home() {
   const [stats, picks] = await Promise.all([fetchStats(), fetchTopPicks()]);
   const ldjson = {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "stakesense",
-    description:
-      "ML-powered Solana validator scoring on three pillars: predicted downtime risk, MEV tax, decentralization.",
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    license: "https://opensource.org/licenses/MIT",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": "https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/#app",
+        name: "stakesense",
+        description:
+          "ML-powered Solana validator scoring on three pillars: predicted downtime risk, MEV tax, decentralization.",
+        applicationCategory: "FinanceApplication",
+        operatingSystem: "Web",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+        license: "https://opensource.org/licenses/MIT",
+        codeRepository: "https://github.com/mikejohnkurkeyerian-eng/stakesense",
+      },
+      {
+        "@type": "Dataset",
+        "@id": "https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/#dataset",
+        name: "Stakesense Validator Predictions",
+        description:
+          "Daily-refreshed predictions of downtime risk, MEV tax, and decentralization scores for every active Solana mainnet validator.",
+        license: "https://creativecommons.org/licenses/by/4.0/",
+        creator: {
+          "@type": "Organization",
+          name: "stakesense",
+          url: "https://github.com/mikejohnkurkeyerian-eng/stakesense",
+        },
+        keywords: [
+          "Solana",
+          "validators",
+          "staking",
+          "MEV",
+          "decentralization",
+          "Nakamoto coefficient",
+          "machine learning",
+        ],
+        temporalCoverage: "2026-04-29/..",
+        distribution: [
+          {
+            "@type": "DataDownload",
+            encodingFormat: "text/csv",
+            contentUrl:
+              "https://stakesense.onrender.com/api/v1/export/predictions.csv",
+          },
+          {
+            "@type": "DataDownload",
+            encodingFormat: "application/json",
+            contentUrl:
+              "https://stakesense.onrender.com/api/v1/export/predictions.json",
+          },
+        ],
+        isAccessibleForFree: true,
+      },
+      {
+        "@type": "Organization",
+        name: "stakesense",
+        url: "https://github.com/mikejohnkurkeyerian-eng/stakesense",
+        sameAs: [
+          "https://github.com/mikejohnkurkeyerian-eng/stakesense",
+        ],
+      },
+    ],
   };
   return (
     <main className="min-h-screen">

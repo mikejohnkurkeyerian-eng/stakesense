@@ -5,5 +5,10 @@
   "scripts": {
     "dev": "pnpm --filter web dev",
     "build": "pnpm --filter web build"
+  },
+  "pnpm": {
+    "overrides": {
+      "@solana/kit": "^5.5.1"
+    }
   }
 }

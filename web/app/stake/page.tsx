@@ -12,6 +12,7 @@ import {
 } from "@solana/web3.js";
 import { useState } from "react";
 
+import PrivyAltLogin from "@/components/PrivyAltLogin";
 import { recommend } from "@/lib/api";
 import type { Recommendation } from "@/lib/types";
 
@@ -211,7 +212,7 @@ export default function StakePage() {
           {!connected ? (
             <>
               <span className="text-slate-500">
-                Connect a wallet to enable staking →
+                Connect to enable staking →
               </span>
               <WalletMultiButton
                 style={{
@@ -221,6 +222,7 @@ export default function StakePage() {
                   height: "36px",
                 }}
               />
+              <PrivyAltLogin />
             </>
           ) : (
             <>
