@@ -76,7 +76,8 @@ export default function ValidatorsTable({
         ))}
       </div>
 
-      <div className="overflow-x-auto rounded-lg border">
+      {/* Desktop / tablet table */}
+      <div className="hidden md:block overflow-x-auto rounded-lg border">
         <table className="w-full text-sm">
           <thead className="bg-slate-100">
             <tr>
@@ -143,6 +144,59 @@ export default function ValidatorsTable({
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile card list */}
+      <div className="md:hidden space-y-2">
+        {filtered.map((v) => (
+          <Link
+            key={v.vote_pubkey}
+            href={`/validators/${v.vote_pubkey}`}
+            className="block border rounded-lg p-3 bg-white active:bg-slate-50"
+          >
+            <div className="flex justify-between items-baseline mb-2 gap-2">
+              <div className="font-medium text-blue-600 truncate">
+                {v.name ?? shortPk(v.vote_pubkey)}
+              </div>
+              <div className="font-mono font-bold text-slate-900 text-base flex-shrink-0">
+                {fmtScore(v.composite_score)}
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-xs text-slate-600">
+              <div>
+                <div className="uppercase tracking-wide text-slate-400 text-[10px]">
+                  Downtime
+                </div>
+                <div className="font-mono">{fmtPct(v.downtime_prob_7d)}</div>
+              </div>
+              <div>
+                <div className="uppercase tracking-wide text-slate-400 text-[10px]">
+                  MEV
+                </div>
+                <div className="font-mono">{fmtPct(v.mev_tax_rate)}</div>
+              </div>
+              <div>
+                <div className="uppercase tracking-wide text-slate-400 text-[10px]">
+                  Decentr.
+                </div>
+                <div className="font-mono">
+                  {fmtScore(v.decentralization_score)}
+                </div>
+              </div>
+            </div>
+            {v.data_center && (
+              <div className="text-[11px] text-slate-500 mt-2 truncate">
+                {v.data_center}
+                {v.country && ` · ${v.country}`}
+              </div>
+            )}
+          </Link>
+        ))}
+        {filtered.length === 0 && (
+          <div className="border rounded-lg p-6 text-center text-slate-500 text-sm bg-white">
+            No validators match {`"${query}"`} in the top {rows.length}.
+          </div>
+        )}
       </div>
     </>
   );
