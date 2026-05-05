@@ -2,6 +2,11 @@ import Link from "next/link";
 
 import type { Recommendation } from "@/lib/types";
 
+// Skip static generation at build time — Render free-tier cold-starts can take
+// 30+ seconds, which times out Vercel's static generation. Render on-demand
+// instead; ISR will cache the result for 5 min once warm.
+export const dynamic = "force-dynamic";
+
 type Stats = {
   avg_mev_tax: number | null;
   avg_downtime_prob: number | null;
