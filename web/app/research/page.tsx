@@ -288,23 +288,23 @@ function ClusterSection({
       <div className="border rounded-lg p-5 bg-violet-50 mb-4">
         <p className="text-sm text-violet-900">{insightForTopBucket(top)}</p>
       </div>
-      <div className="border rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="border rounded-lg overflow-x-auto">
+        <table className="w-full text-sm min-w-[420px]">
           <thead className="bg-slate-100">
             <tr>
-              <th className="text-left px-4 py-2">Cluster</th>
-              <th className="text-right px-4 py-2">Validators</th>
-              <th className="text-right px-4 py-2">Total stake</th>
+              <th className="text-left px-3 py-2">Cluster</th>
+              <th className="text-right px-3 py-2 whitespace-nowrap">Validators</th>
+              <th className="text-right px-3 py-2 whitespace-nowrap">Total stake</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((c, i) => (
               <tr key={`${c.cluster}-${i}`} className="border-t">
-                <td className="px-4 py-2 text-slate-700">{c.cluster}</td>
-                <td className="px-4 py-2 text-right tabular-nums">
+                <td className="px-3 py-2 text-slate-700 break-all">{c.cluster}</td>
+                <td className="px-3 py-2 text-right tabular-nums">
                   {c.n_validators}
                 </td>
-                <td className="px-4 py-2 text-right tabular-nums text-slate-500">
+                <td className="px-3 py-2 text-right tabular-nums text-slate-500 whitespace-nowrap">
                   {lamportsToSol(c.total_stake)}
                 </td>
               </tr>
