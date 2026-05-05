@@ -1,9 +1,16 @@
 import type { Validator, ValidatorDetail, RecommendResponse } from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE!;
+// Render free-tier cold-starts can take 30+ seconds; cap server-side fetches
+// at 20s so the page renders a graceful "warming up" state instead of timing
+// out the whole serverless function.
+const SERVER_FETCH_TIMEOUT_MS = 20_000;
 
 async function get<T>(path: string): Promise<T> {
-  const r = await fetch(`${BASE}${path}`, { next: { revalidate: 60 } });
+  const r = await fetch(`${BASE}${path}`, {
+    next: { revalidate: 60 },
+    signal: AbortSignal.timeout(SERVER_FETCH_TIMEOUT_MS),
+  });
   if (!r.ok) throw new Error(`${path} failed: ${r.status}`);
   return r.json() as Promise<T>;
 }
@@ -38,6 +45,7 @@ export async function recommend(body: {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(SERVER_FETCH_TIMEOUT_MS),
   });
   if (!r.ok) throw new Error(`recommend failed: ${r.status}`);
   return r.json() as Promise<RecommendResponse>;

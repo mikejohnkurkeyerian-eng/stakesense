@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import ApiWarmup from "@/components/ApiWarmup";
 import ConnectBar from "@/components/ConnectBar";
 import Footer from "@/components/Footer";
 import WalletProvider from "@/components/WalletProvider";
@@ -61,6 +62,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-slate-50">
         <WalletProvider>
+          <ApiWarmup />
           <ConnectBar />
           <div className="flex-1">{children}</div>
           <Footer />
