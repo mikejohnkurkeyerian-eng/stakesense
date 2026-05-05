@@ -3,7 +3,9 @@
 import Script from "next/script";
 import { useEffect, useState } from "react";
 
-const SAMPLE_VOTE_PUBKEY = "DPjpYCtrNSEX2BLZJBQbXk2bdT7yHoVyVE3HwmK7Z6h";
+// A real top-ranked mainnet vote pubkey so the widget preview renders
+// non-empty data immediately. Users can paste any other vote pubkey to test.
+const SAMPLE_VOTE_PUBKEY = "5AC692spnjbegP7ttCXJEzUe8S81sLYsqJd8Ae6Zv1xU";
 
 const TABS = [
   { id: "single-light", label: "Single (light)" },
