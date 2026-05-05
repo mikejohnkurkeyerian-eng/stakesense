@@ -24,6 +24,7 @@ async function fetchAnomalies(): Promise<Detection[]> {
   try {
     const r = await fetch(`${API_BASE}/api/v1/anomalies?limit=30`, {
       next: { revalidate: 600 },
+      signal: AbortSignal.timeout(15_000),
     });
     if (!r.ok) return [];
     const j = await r.json();

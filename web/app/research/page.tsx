@@ -33,6 +33,7 @@ async function fetchStats(): Promise<Stats | null> {
   try {
     const r = await fetch(`${API_BASE}/api/v1/validators/stats`, {
       next: { revalidate: 1800 },
+      signal: AbortSignal.timeout(15_000),
     });
     return r.ok ? r.json() : null;
   } catch {
@@ -44,6 +45,7 @@ async function fetchClusters(by: string): Promise<ClustersResp | null> {
   try {
     const r = await fetch(`${API_BASE}/api/v1/validators/clusters?by=${by}&top=10`, {
       next: { revalidate: 1800 },
+      signal: AbortSignal.timeout(15_000),
     });
     return r.ok ? r.json() : null;
   } catch {

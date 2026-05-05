@@ -18,7 +18,7 @@ async function fetchStats(): Promise<Stats | null> {
   try {
     const r = await fetch(
       `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/validators/stats`,
-      { next: { revalidate: 300 } }
+      { next: { revalidate: 300 }, signal: AbortSignal.timeout(15_000) }
     );
     return r.ok ? r.json() : null;
   } catch {
@@ -38,7 +38,7 @@ async function fetchAnomalies(): Promise<Anomaly[]> {
   try {
     const r = await fetch(
       `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/anomalies?limit=4`,
-      { next: { revalidate: 600 } }
+      { next: { revalidate: 600 }, signal: AbortSignal.timeout(15_000) }
     );
     if (!r.ok) return [];
     const j = await r.json();
@@ -61,6 +61,7 @@ async function fetchTopPicks(): Promise<Recommendation[] | null> {
           count: 3,
         }),
         next: { revalidate: 300 },
+        signal: AbortSignal.timeout(15_000),
       }
     );
     if (!r.ok) return null;
