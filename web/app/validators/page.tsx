@@ -2,6 +2,8 @@ import { listValidators } from "@/lib/api";
 
 import ValidatorsTable from "./ValidatorsTable";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page({
   searchParams,
 }: {

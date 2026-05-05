@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import HistoryCharts from "@/components/HistoryCharts";
+
+export const dynamic = "force-dynamic";
 import PredictionHistoryChart from "@/components/PredictionHistoryChart";
 import { getPredictionHistory, getValidator } from "@/lib/api";
 

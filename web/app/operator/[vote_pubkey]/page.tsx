@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import PredictionHistoryChart from "@/components/PredictionHistoryChart";
+
+export const dynamic = "force-dynamic";
 import type { PredictionPoint } from "@/lib/api";
 
 const API_BASE =

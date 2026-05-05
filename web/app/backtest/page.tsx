@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import BacktestChart from "./BacktestChart";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Backtest — stakesense",
   description: "How our top-K composite picks compare to baselines.",
