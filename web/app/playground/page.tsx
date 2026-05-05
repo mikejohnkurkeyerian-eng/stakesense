@@ -92,6 +92,12 @@ const ENDPOINTS: Endpoint[] = [
   },
 ];
 
+function shortenPath(p: string): string {
+  // Replace 32+ char base58 IDs with `{vote_pubkey}` placeholder so the sidebar
+  // stays readable.
+  return p.replace(/\/[1-9A-HJ-NP-Za-km-z]{32,44}/g, "/{vote_pubkey}");
+}
+
 export default function PlaygroundPage() {
   const [active, setActive] = useState<string>("health");
   const [response, setResponse] = useState<string>("");
@@ -152,9 +158,9 @@ export default function PlaygroundPage() {
         .
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <aside className="md:col-span-1">
-          <ul className="space-y-1">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <aside className="md:col-span-4 lg:col-span-3">
+          <ul className="space-y-1 sticky top-20">
             {ENDPOINTS.map((e) => (
               <li key={e.id}>
                 <button
@@ -163,23 +169,26 @@ export default function PlaygroundPage() {
                     setResponse("");
                     setResponseStatus(null);
                   }}
-                  className={`w-full text-left p-2 rounded text-sm font-mono ${
+                  className={`w-full text-left p-2 rounded text-xs font-mono break-all ${
                     active === e.id
                       ? "bg-violet-100 text-violet-900"
                       : "hover:bg-slate-100 text-slate-700"
                   }`}
+                  title={e.path}
                 >
-                  <span className="text-xs font-bold mr-2 opacity-60">
+                  <span className="text-[10px] font-bold mr-2 opacity-60 align-top">
                     {e.method}
                   </span>
-                  {e.path.split("?")[0].replace("/api/v1", "")}
+                  <span className="break-all">
+                    {shortenPath(e.path.split("?")[0].replace("/api/v1", ""))}
+                  </span>
                 </button>
               </li>
             ))}
           </ul>
         </aside>
 
-        <div className="md:col-span-2">
+        <div className="md:col-span-8 lg:col-span-9">
           <div className="border rounded-lg p-5 bg-white mb-4">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xs font-bold bg-slate-100 px-2 py-0.5 rounded">
