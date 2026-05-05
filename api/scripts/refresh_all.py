@@ -83,11 +83,18 @@ async def main() -> None:
                 vote = r.get("vote_account")
                 if not vote:
                     continue
+                dc_key = (r.get("data_center_key") or "").strip()
+                # data_center_key format: "<asn>-<COUNTRY>-<city>" e.g. "20326-NL-Amsterdam"
+                country_code = None
+                if dc_key:
+                    parts = dc_key.split("-", 2)
+                    if len(parts) >= 2 and len(parts[1]) == 2 and parts[1].isalpha():
+                        country_code = parts[1].upper()
                 payload.append({
                     "vote_pubkey": vote,
-                    "data_center": (r.get("data_center_key") or "").strip() or None,
+                    "data_center": dc_key or None,
                     "asn": str(r.get("autonomous_system_number") or "") or None,
-                    "country": (r.get("data_center_host") or r.get("country") or "").strip() or None,
+                    "country": country_code,
                     "name": (r.get("name") or "").strip() or None,
                 })
             if payload:
