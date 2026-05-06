@@ -432,6 +432,12 @@ export default async function Home() {
             tone="emerald"
           />
           <SurfaceCard
+            href="/simulate"
+            title="Migration simulator"
+            blurb="What-if any rebalance, see composite + concentration deltas"
+            tone="violet"
+          />
+          <SurfaceCard
             href="/integrations/mcp"
             title="MCP server"
             blurb="Claude Desktop / Cursor query stakesense natively"

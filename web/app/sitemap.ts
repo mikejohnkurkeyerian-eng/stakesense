@@ -23,5 +23,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/changelog`, lastModified: now, priority: 0.4 },
     { url: `${SITE_URL}/stake/multisig`, lastModified: now, priority: 0.6 },
     { url: `${SITE_URL}/playground`, lastModified: now, priority: 0.6 },
+    { url: `${SITE_URL}/simulate`, lastModified: now, priority: 0.7 },
   ];
 }

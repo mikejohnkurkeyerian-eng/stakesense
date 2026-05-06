@@ -20,6 +20,7 @@ const PRIMARY_LINKS: { href: string; label: string }[] = [
 ];
 
 const MORE_LINKS: { href: string; label: string; sub?: string }[] = [
+  { href: "/simulate", label: "Migration simulator", sub: "What-if rebalance impact" },
   { href: "/compare", label: "Compare", sub: "Side-by-side validator comparison" },
   { href: "/backtest", label: "Backtest", sub: "Historical strategy performance" },
   { href: "/playground", label: "API playground", sub: "Interactive endpoint explorer" },
