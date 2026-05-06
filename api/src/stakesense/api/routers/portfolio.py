@@ -116,6 +116,89 @@ async def analyze_portfolio(owner_pubkey: str) -> dict:
     return _serialize(report)
 
 
+@router.get("/{owner_pubkey}/history")
+async def portfolio_history(owner_pubkey: str) -> dict:
+    """Chronological timeline of a wallet's stake-account lifecycle.
+
+    Reads stake accounts via RPC and emits events sorted by activation
+    epoch — when each account was activated, when (if applicable) it
+    started deactivating, etc. Useful for "show me how this portfolio
+    evolved over time" views.
+    """
+    if not _PK_RE.match(owner_pubkey):
+        raise HTTPException(status_code=400, detail="Invalid pubkey: expected base58")
+    rpc_url = settings.helius_rpc_url
+    if not rpc_url:
+        raise HTTPException(status_code=503, detail="Solana RPC not configured.")
+    try:
+        stake_accounts = await fetch_stake_accounts_for_owner(rpc_url, owner_pubkey)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=f"RPC error: {e}") from e
+
+    voters = sorted({a.voter_pubkey for a in stake_accounts if a.voter_pubkey})
+    name_lookup: dict[str, str] = {}
+    if voters:
+        with engine.begin() as conn:
+            for row in conn.execute(
+                text(
+                    "SELECT vote_pubkey, name FROM validators WHERE vote_pubkey = ANY(:v)"
+                ),
+                {"v": voters},
+            ).mappings():
+                name_lookup[row["vote_pubkey"]] = row["name"] or ""
+
+    MAX_EPOCH = 18446744073709551615  # u64 sentinel = "not yet deactivated"
+    events: list[dict] = []
+    for a in stake_accounts:
+        validator_name = name_lookup.get(a.voter_pubkey or "")
+        events.append(
+            {
+                "kind": "activation",
+                "stake_account": a.pubkey,
+                "voter_pubkey": a.voter_pubkey,
+                "validator_name": validator_name or None,
+                "sol": a.sol,
+                "epoch": a.activation_epoch,
+                "summary": (
+                    f"Activated {a.sol:.2f} SOL"
+                    + (
+                        f" → {validator_name or (a.voter_pubkey or '')[:8] + '…'}"
+                        if a.voter_pubkey
+                        else ""
+                    )
+                    + (f" (epoch {a.activation_epoch})" if a.activation_epoch is not None else "")
+                ),
+            }
+        )
+        if (
+            a.deactivation_epoch is not None
+            and a.deactivation_epoch != MAX_EPOCH
+            and a.activation_epoch is not None
+            and a.deactivation_epoch >= a.activation_epoch
+        ):
+            events.append(
+                {
+                    "kind": "deactivation",
+                    "stake_account": a.pubkey,
+                    "voter_pubkey": a.voter_pubkey,
+                    "validator_name": validator_name or None,
+                    "sol": a.sol,
+                    "epoch": a.deactivation_epoch,
+                    "summary": (
+                        f"Began deactivating {a.sol:.2f} SOL "
+                        f"(epoch {a.deactivation_epoch})"
+                    ),
+                }
+            )
+
+    events.sort(key=lambda e: (e["epoch"] is None, e["epoch"] or 0))
+    return {
+        "owner_pubkey": owner_pubkey,
+        "n_events": len(events),
+        "events": events,
+    }
+
+
 @router.get("/{owner_pubkey}/optimize")
 async def optimize_portfolio(
     owner_pubkey: str,

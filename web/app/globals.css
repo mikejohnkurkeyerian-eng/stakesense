@@ -128,3 +128,66 @@
     @apply font-sans;
   }
 }
+
+/* Print stylesheet — clean PDF when delegators "Save as PDF" a validator
+   detail page or research page. Strips chrome, keeps the data. */
+@media print {
+  /* Hide chrome that doesn't add value on paper */
+  nav,
+  header,
+  footer,
+  .no-print,
+  [data-no-print],
+  button,
+  form,
+  a[href^="#"],
+  [role="navigation"] {
+    display: none !important;
+  }
+  /* Add the URL after links so the printed page is self-referencing */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #555;
+  }
+  /* No auto-warmup banner / connect button in print */
+  body > div:first-of-type {
+    display: block !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 10pt;
+  }
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  /* Tables shouldn't get cut off mid-row */
+  tr,
+  thead,
+  tfoot {
+    page-break-inside: avoid;
+  }
+  h1 {
+    font-size: 22pt;
+    margin-bottom: 8pt;
+  }
+  h2 {
+    font-size: 14pt;
+    margin-top: 12pt;
+    margin-bottom: 6pt;
+    page-break-after: avoid;
+  }
+  /* A subtle stakesense byline at the bottom of every printed page */
+  body::after {
+    content: "stakesense — predictive Solana validator scoring · CC-BY 4.0";
+    display: block;
+    font-size: 8pt;
+    color: #777;
+    margin-top: 24pt;
+    border-top: 1px solid #ccc;
+    padding-top: 6pt;
+  }
+}

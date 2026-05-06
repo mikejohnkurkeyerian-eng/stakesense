@@ -1,0 +1,132 @@
+name: stakesense validator monitor
+
+# Reusable workflow that other repos can call to monitor a list of validators
+# they care about. Fails the run if any monitored validator's composite score
+# drops below the threshold or its 7-day downtime probability rises above
+# the alert threshold. Optionally posts a Discord summary.
+#
+# Example caller:
+#
+#   jobs:
+#     check-validators:
+#       uses: mikejohnkurkeyerian-eng/stakesense/.github/workflows/stakesense-monitor.yml@main
+#       with:
+#         vote_pubkeys: |
+#           5AC692spnjbegP7ttCXJEzUe8S81sLYsqJd8Ae6Zv1xU
+#           8uYxWYaRz9a3WPvE2LEgEp6sSfTCTRnRx54yKxdRGgsL
+#         min_composite: 0.85
+#         max_downtime: 0.05
+#       secrets:
+#         discord_webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+on:
+  workflow_call:
+    inputs:
+      vote_pubkeys:
+        description: "Newline-separated list of validator vote pubkeys"
+        required: true
+        type: string
+      api_base:
+        description: "stakesense API base URL"
+        required: false
+        type: string
+        default: "https://stakesense.onrender.com"
+      min_composite:
+        description: "Fail if any monitored validator's composite drops below this"
+        required: false
+        type: number
+        default: 0.80
+      max_downtime:
+        description: "Fail if any monitored validator's 7d downtime prob rises above this"
+        required: false
+        type: number
+        default: 0.10
+      post_summary:
+        description: "Always post a Discord summary (otherwise only on alert)"
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      discord_webhook_url:
+        description: "Optional — Discord Incoming Webhook URL for alert posts"
+        required: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check validator scores
+        env:
+          VOTE_PUBKEYS: ${{ inputs.vote_pubkeys }}
+          API_BASE: ${{ inputs.api_base }}
+          MIN_COMPOSITE: ${{ inputs.min_composite }}
+          MAX_DOWNTIME: ${{ inputs.max_downtime }}
+          POST_SUMMARY: ${{ inputs.post_summary }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.discord_webhook_url }}
+        shell: python {0}
+        run: |
+          import json, os, sys, urllib.request
+
+          api_base = os.environ["API_BASE"].rstrip("/")
+          min_composite = float(os.environ["MIN_COMPOSITE"])
+          max_downtime = float(os.environ["MAX_DOWNTIME"])
+          post_summary = os.environ.get("POST_SUMMARY", "false").lower() == "true"
+          webhook = os.environ.get("DISCORD_WEBHOOK_URL") or ""
+          pks = [
+              p.strip()
+              for p in os.environ["VOTE_PUBKEYS"].splitlines()
+              if p.strip()
+          ]
+
+          alerts = []
+          summary = []
+          for pk in pks:
+              url = f"{api_base}/api/v1/validators/{pk}"
+              try:
+                  with urllib.request.urlopen(url, timeout=20) as r:
+                      body = json.loads(r.read())
+              except Exception as e:  # noqa: BLE001
+                  alerts.append(f"- :grey_question: {pk}: lookup failed ({e})")
+                  continue
+              v = body.get("validator", {})
+              name = v.get("name") or pk[:8] + "…"
+              comp = v.get("composite_score")
+              dt = v.get("downtime_prob_7d")
+              summary.append(f"- {name} — composite {comp}, downtime {dt}")
+              if comp is not None and float(comp) < min_composite:
+                  alerts.append(
+                      f":chart_with_downwards_trend: *{name}* composite {comp:.3f} "
+                      f"< threshold {min_composite}"
+                  )
+              if dt is not None and float(dt) > max_downtime:
+                  alerts.append(
+                      f":warning: *{name}* downtime risk {float(dt):.3f} "
+                      f"> threshold {max_downtime}"
+                  )
+
+          should_post = bool(alerts) or post_summary
+          if should_post and webhook:
+              if alerts:
+                  parts = [f"**stakesense alert — {len(alerts)} issue(s)**", *alerts]
+              else:
+                  parts = ["**stakesense — all monitored validators healthy**"]
+              if post_summary:
+                  parts += ["", "_Snapshot:_", *summary]
+              content = "\n".join(parts)[:1900]
+              data = json.dumps({"content": content}).encode()
+              req = urllib.request.Request(
+                  webhook,
+                  data=data,
+                  headers={"Content-Type": "application/json"},
+              )
+              try:
+                  urllib.request.urlopen(req, timeout=15)
+              except Exception as e:  # noqa: BLE001
+                  print(f"Discord post failed: {e}", file=sys.stderr)
+
+          if alerts:
+              print("stakesense monitor: alerts:")
+              for a in alerts:
+                  print(f"  {a}")
+              sys.exit(1)
+          print("stakesense monitor: all validators within thresholds")

@@ -48,3 +48,22 @@ CREATE TABLE IF NOT EXISTS predictions (
 CREATE INDEX IF NOT EXISTS idx_predictions_date ON predictions (prediction_date DESC);
 CREATE INDEX IF NOT EXISTS idx_predictions_composite ON predictions (composite_score DESC);
 CREATE INDEX IF NOT EXISTS idx_epoch_performance_epoch ON epoch_performance (epoch DESC);
+
+-- Watch subscriptions: a public registry of "alert me when validator X moves
+-- past threshold Y". Notification dispatch is owned by a separate script
+-- (api/scripts/dispatch_watch_alerts.py) that runs after each refresh.
+CREATE TABLE IF NOT EXISTS watch_subscriptions (
+  id              SERIAL PRIMARY KEY,
+  vote_pubkey     TEXT NOT NULL,
+  webhook_url     TEXT NOT NULL,
+  webhook_kind    TEXT NOT NULL DEFAULT 'discord',
+  metric          TEXT NOT NULL DEFAULT 'composite_score',
+  comparator      TEXT NOT NULL DEFAULT 'lt',
+  threshold       DOUBLE PRECISION NOT NULL,
+  label           TEXT,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_fired_at   TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_watch_vote_pubkey
+  ON watch_subscriptions (vote_pubkey);

@@ -1,0 +1,53 @@
+{
+  "name": "@stakesense/react-widget",
+  "version": "0.1.0",
+  "description": "React components for embedding stakesense validator scores. Companion to the framework-agnostic widget.js.",
+  "keywords": [
+    "react",
+    "solana",
+    "validators",
+    "staking",
+    "stakesense",
+    "widget"
+  ],
+  "homepage": "https://github.com/mikejohnkurkeyerian-eng/stakesense#readme",
+  "bugs": {
+    "url": "https://github.com/mikejohnkurkeyerian-eng/stakesense/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikejohnkurkeyerian-eng/stakesense.git",
+    "directory": "packages/react-widget"
+  },
+  "license": "MIT",
+  "author": "Mike <mikejohnkurkeyerian@gmail.com>",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.0.1",
+    "@types/react": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "happy-dom": "^15.7.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

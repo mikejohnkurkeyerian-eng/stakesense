@@ -95,7 +95,7 @@ flowchart TB
 - **2,186** MEV-commission observations
 - **3,914** composite predictions written
 - **2.7%** delinquent share captured
-- **18/18** tests passing
+- **82+** api tests passing (plus 17 mcp + 2 react-widget)
 - Cron: **2x/day**, mean ~6 min E2E, green for 7+ days
 
 Refresh `https://stakesense.onrender.com/api/v1/stats` for the current numbers.
@@ -106,7 +106,7 @@ Refresh `https://stakesense.onrender.com/api/v1/stats` for the current numbers.
 |---|---|---|
 | **Phantom** | Wallet-adapter staking flow on `/stake` | ✅ Wired (devnet) |
 | **Privy** | Email / social embedded wallet on `/stake` | ✅ Wired (gracefully no-op without `NEXT_PUBLIC_PRIVY_APP_ID`) |
-| **Squads** | DAO multisig staking flow on `/stake/dao` | 🚧 Day 5 |
+| **Squads** | DAO multisig stake-tx generator on `/stake/multisig` | ✅ Wired (serialize-and-paste) |
 | **Solana Foundation** | Nakamoto coefficient surfacing, decentralization-first scoring, Public Goods track | ✅ Surfaced in `/stats` and landing |
 
 ## Public-goods commitments

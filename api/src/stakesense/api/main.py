@@ -13,6 +13,7 @@ from stakesense.api.routers import portfolio as portfolio_router
 from stakesense.api.routers import recommend as recommend_router
 from stakesense.api.routers import simulate as simulate_router
 from stakesense.api.routers import validators as validators_router
+from stakesense.api.routers import watch as watch_router
 from stakesense.db import engine
 
 app = FastAPI(title="stakesense", version="0.1.0")
@@ -52,3 +53,4 @@ app.include_router(portfolio_router.router)
 app.include_router(anomalies_router.router)
 app.include_router(simulate_router.router)
 app.include_router(developers_router.router)
+app.include_router(watch_router.router)
