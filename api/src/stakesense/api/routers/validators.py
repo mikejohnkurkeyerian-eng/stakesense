@@ -40,8 +40,28 @@ def list_validators(
     sort: Literal["composite", "downtime", "mev_tax", "decentralization"] = "composite",
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
+    country: str | None = Query(None, max_length=64, description="Filter by country (ISO code or raw label)"),
+    asn: str | None = Query(None, max_length=24, description="Filter by ASN (e.g. 16125)"),
+    max_commission: int | None = Query(None, ge=0, le=100, description="Max commission %"),
+    q: str | None = Query(None, max_length=64, description="Substring search on validator name"),
 ) -> dict:
     sort_clause = SORT_CLAUSE[sort]
+    where_clauses = []
+    params: dict = {"limit": limit, "offset": offset}
+    if country:
+        where_clauses.append("UPPER(v.country) = UPPER(:country)")
+        params["country"] = country
+    if asn:
+        where_clauses.append("v.asn = :asn")
+        params["asn"] = asn
+    if max_commission is not None:
+        where_clauses.append("v.commission_pct <= :max_commission")
+        params["max_commission"] = max_commission
+    if q:
+        where_clauses.append("v.name ILIKE :q")
+        params["q"] = f"%{q}%"
+    where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+
     sql = text(
         f"""
         WITH latest AS (
@@ -50,23 +70,40 @@ def list_validators(
            ORDER BY p.vote_pubkey, p.prediction_date DESC
         )
         SELECT v.vote_pubkey, v.name, v.commission_pct, v.active_stake,
-               v.data_center, v.country,
+               v.data_center, v.country, v.asn,
                l.composite_score, l.downtime_prob_7d, l.mev_tax_rate,
                l.decentralization_score
           FROM validators v
           JOIN latest l ON l.vote_pubkey = v.vote_pubkey
+         {where_sql}
          ORDER BY {sort_clause}
          LIMIT :limit OFFSET :offset
         """
     )
     count_sql = text(
-        "SELECT COUNT(*) FROM predictions "
-        "WHERE prediction_date = (SELECT MAX(prediction_date) FROM predictions)"
+        f"""
+        SELECT COUNT(*)
+          FROM validators v
+          JOIN predictions l ON l.vote_pubkey = v.vote_pubkey
+            AND l.prediction_date = (SELECT MAX(prediction_date) FROM predictions)
+         {where_sql}
+        """
     )
     with engine.begin() as conn:
-        total = conn.execute(count_sql).scalar() or 0
-        rows = [dict(r._mapping) for r in conn.execute(sql, {"limit": limit, "offset": offset})]
-    return {"results": rows, "total": total, "limit": limit, "offset": offset}
+        total = conn.execute(count_sql, params).scalar() or 0
+        rows = [dict(r._mapping) for r in conn.execute(sql, params)]
+    return {
+        "results": rows,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "filters": {
+            "country": country,
+            "asn": asn,
+            "max_commission": max_commission,
+            "q": q,
+        },
+    }
 
 
 @router.get("/stats")

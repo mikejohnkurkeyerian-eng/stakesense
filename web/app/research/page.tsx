@@ -55,6 +55,31 @@ async function fetchClusters(by: string): Promise<ClustersResp | null> {
   }
 }
 
+type HistoryPoint = {
+  date: string;
+  n_scored: number;
+  avg_decentralization: number | null;
+  avg_composite: number | null;
+  avg_downtime: number | null;
+  avg_mev_tax: number | null;
+  n_high: number;
+  n_low: number;
+};
+
+type HistoryResp = { series: HistoryPoint[]; n_days: number };
+
+async function fetchHistory(): Promise<HistoryResp | null> {
+  try {
+    const r = await fetch(`${API_BASE}/api/v1/export/decentralization/history?days=30`, {
+      next: { revalidate: 1800 },
+      signal: AbortSignal.timeout(15_000),
+    });
+    return r.ok ? r.json() : null;
+  } catch {
+    return null;
+  }
+}
+
 function pct(x: number | null | undefined) {
   return x == null ? "—" : `${(x * 100).toFixed(1)}%`;
 }
@@ -65,11 +90,12 @@ function lamportsToSol(l: number | null) {
 }
 
 export default async function ResearchPage() {
-  const [stats, dcClusters, asnClusters, countryClusters] = await Promise.all([
+  const [stats, dcClusters, asnClusters, countryClusters, history] = await Promise.all([
     fetchStats(),
     fetchClusters("data_center"),
     fetchClusters("asn"),
     fetchClusters("country"),
+    fetchHistory(),
   ]);
 
   return (
@@ -110,6 +136,40 @@ export default async function ResearchPage() {
           />
         </div>
       </section>
+
+      {history && history.series.length >= 2 && (
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold mb-3 text-violet-700">
+            Decentralization trend ({history.n_days}d)
+          </h2>
+          <p className="text-sm text-slate-600 mb-3">
+            Average decentralization score across all scored validators per
+            day. Higher = stake spreads across more independent operators.
+          </p>
+          <SparkChart
+            series={history.series}
+            getValue={(p) => p.avg_decentralization}
+            colorClass="text-violet-600"
+            label="Avg decentralization"
+          />
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <SparkChart
+              series={history.series}
+              getValue={(p) => p.avg_composite}
+              colorClass="text-emerald-600"
+              label="Avg composite"
+              compact
+            />
+            <SparkChart
+              series={history.series}
+              getValue={(p) => p.avg_mev_tax}
+              colorClass="text-amber-600"
+              label="Avg MEV tax"
+              compact
+            />
+          </div>
+        </section>
+      )}
 
       <section className="mb-12">
         <h2 className="text-2xl font-bold mb-3 text-violet-700">
@@ -313,5 +373,92 @@ function ClusterSection({
         </table>
       </div>
     </section>
+  );
+}
+
+function SparkChart({
+  series,
+  getValue,
+  colorClass,
+  label,
+  compact = false,
+}: {
+  series: HistoryPoint[];
+  getValue: (p: HistoryPoint) => number | null;
+  colorClass: string;
+  label: string;
+  compact?: boolean;
+}) {
+  const points = series
+    .map((p, i) => ({ idx: i, val: getValue(p), date: p.date }))
+    .filter((p): p is { idx: number; val: number; date: string } => p.val != null);
+  if (points.length < 2) {
+    return (
+      <div className="border rounded-lg p-4 bg-white text-sm text-slate-500">
+        {label}: not enough data points yet
+      </div>
+    );
+  }
+  const W = 600;
+  const H = compact ? 80 : 140;
+  const Pad = 24;
+  const vals = points.map((p) => p.val);
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  const span = max - min || 1;
+  const stepX = (W - Pad * 2) / (points.length - 1);
+  const path = points
+    .map((p, i) => {
+      const x = Pad + i * stepX;
+      const y = Pad + (1 - (p.val - min) / span) * (H - Pad * 2);
+      return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+  const first = points[0];
+  const last = points[points.length - 1];
+  const delta = last.val - first.val;
+  return (
+    <div className="border rounded-lg p-4 bg-white">
+      <div className="flex justify-between items-baseline mb-2">
+        <div className="text-sm font-semibold">{label}</div>
+        <div className="text-xs tabular-nums">
+          <span className="text-slate-500">{first.val.toFixed(3)}</span>
+          {" → "}
+          <span className="font-semibold">{last.val.toFixed(3)}</span>
+          <span
+            className={
+              "ml-2 " +
+              (delta > 0 ? "text-emerald-600" : delta < 0 ? "text-red-600" : "text-slate-500")
+            }
+          >
+            ({delta >= 0 ? "+" : ""}
+            {delta.toFixed(3)})
+          </span>
+        </div>
+      </div>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className={`w-full ${colorClass}`}
+        role="img"
+        aria-label={`${label} sparkline`}
+      >
+        <path d={path} fill="none" stroke="currentColor" strokeWidth={2} strokeLinejoin="round" />
+        {points.map((p, i) => (
+          <circle
+            key={i}
+            cx={Pad + i * stepX}
+            cy={Pad + (1 - (p.val - min) / span) * (H - Pad * 2)}
+            r={i === points.length - 1 ? 3.5 : 2}
+            fill="currentColor"
+          />
+        ))}
+      </svg>
+      {!compact && (
+        <div className="flex justify-between text-[10px] text-slate-400 mt-1">
+          <span>{first.date}</span>
+          <span>{last.date}</span>
+        </div>
+      )}
+    </div>
   );
 }

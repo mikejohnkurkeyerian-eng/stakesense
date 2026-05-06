@@ -159,6 +159,64 @@ def validators_csv() -> Response:
     return _csv_response("stakesense-validators.csv", rows, header)
 
 
+@router.get("/decentralization/history")
+def decentralization_history(days: int = 30) -> JSONResponse:
+    """Daily network-decentralization aggregates from predictions table.
+
+    For each prediction_date, returns avg decentralization score, count
+    of validators above/below thresholds, and average composite. No
+    schema changes required — derived entirely from existing predictions.
+    """
+    sql = text(
+        """
+        SELECT prediction_date,
+               COUNT(*) AS n_scored,
+               AVG(decentralization_score) AS avg_decentralization,
+               AVG(composite_score) AS avg_composite,
+               AVG(downtime_prob_7d) AS avg_downtime,
+               AVG(mev_tax_rate) AS avg_mev_tax,
+               SUM(CASE WHEN decentralization_score >= 0.8 THEN 1 ELSE 0 END) AS n_high,
+               SUM(CASE WHEN decentralization_score < 0.3 THEN 1 ELSE 0 END) AS n_low
+          FROM predictions
+         WHERE decentralization_score IS NOT NULL
+         GROUP BY prediction_date
+         ORDER BY prediction_date ASC
+         LIMIT :days
+        """
+    )
+    with engine.begin() as conn:
+        rows = conn.execute(sql, {"days": max(1, min(days, 365))}).mappings().all()
+    series = [
+        {
+            "date": str(r["prediction_date"]),
+            "n_scored": int(r["n_scored"]),
+            "avg_decentralization": float(r["avg_decentralization"])
+            if r["avg_decentralization"] is not None
+            else None,
+            "avg_composite": float(r["avg_composite"])
+            if r["avg_composite"] is not None
+            else None,
+            "avg_downtime": float(r["avg_downtime"])
+            if r["avg_downtime"] is not None
+            else None,
+            "avg_mev_tax": float(r["avg_mev_tax"])
+            if r["avg_mev_tax"] is not None
+            else None,
+            "n_high": int(r["n_high"]),
+            "n_low": int(r["n_low"]),
+        }
+        for r in rows
+    ]
+    return JSONResponse(
+        {
+            "license": "CC-BY 4.0",
+            "attribution": "stakesense — github.com/mikejohnkurkeyerian-eng/stakesense",
+            "series": series,
+            "n_days": len(series),
+        }
+    )
+
+
 @router.get("/decentralization.json")
 def decentralization_json() -> JSONResponse:
     """Network-level decentralization snapshot.

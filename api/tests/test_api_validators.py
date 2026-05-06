@@ -52,6 +52,45 @@ def test_clusters_rejects_invalid_axis():
     assert r.status_code == 422  # Literal type rejects unknown values
 
 
+def test_list_validators_filter_by_country_narrows_results():
+    client = TestClient(app)
+    full = client.get("/api/v1/validators?limit=200").json()
+    if not full["results"]:
+        return
+    # Pick a short country-code-like value to exercise the filter
+    country = next(
+        (
+            r["country"]
+            for r in full["results"]
+            if r.get("country") and len(r["country"]) <= 8
+        ),
+        None,
+    )
+    if not country:
+        return
+    r = client.get(f"/api/v1/validators?limit=200&country={country}")
+    assert r.status_code == 200
+    filtered = r.json()
+    assert filtered["filters"]["country"] == country
+    for row in filtered["results"]:
+        assert (row["country"] or "").upper() == country.upper()
+
+
+def test_list_validators_max_commission_filter():
+    client = TestClient(app)
+    r = client.get("/api/v1/validators?limit=20&max_commission=5")
+    assert r.status_code == 200
+    for row in r.json()["results"]:
+        assert row["commission_pct"] is None or row["commission_pct"] <= 5
+
+
+def test_list_validators_search_query_returns_filters_in_response():
+    r = TestClient(app).get("/api/v1/validators?limit=5&q=stak")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["filters"]["q"] == "stak"
+
+
 def test_recommend_smoke():
     r = TestClient(app).post(
         "/api/v1/recommend",

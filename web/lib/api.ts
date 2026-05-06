@@ -19,6 +19,10 @@ export async function listValidators(params: {
   sort?: string;
   limit?: number;
   offset?: number;
+  country?: string;
+  asn?: string;
+  max_commission?: number;
+  q?: string;
 }) {
   const qs = new URLSearchParams(
     Object.fromEntries(

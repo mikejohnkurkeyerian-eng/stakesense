@@ -3,12 +3,14 @@ from __future__ import annotations
 
 import re
 from dataclasses import asdict
+from typing import Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import text
 
 from stakesense.config import settings
 from stakesense.db import engine
+from stakesense.scoring.optimize import optimize
 from stakesense.scoring.portfolio import StakePosition, build_report
 from stakesense.sources.stake_accounts import fetch_stake_accounts_for_owner
 
@@ -114,6 +116,87 @@ async def analyze_portfolio(owner_pubkey: str) -> dict:
     return _serialize(report)
 
 
+@router.get("/{owner_pubkey}/optimize")
+async def optimize_portfolio(
+    owner_pubkey: str,
+    objective: Literal["composite", "downtime", "decentralization"] = "composite",
+    max_moves: int = Query(5, ge=1, le=10),
+) -> dict:
+    """Suggest the best small set of swaps to improve `objective` for this wallet."""
+    if not _PK_RE.match(owner_pubkey):
+        raise HTTPException(status_code=400, detail="Invalid pubkey: expected base58")
+
+    rpc_url = settings.helius_rpc_url
+    if not rpc_url:
+        raise HTTPException(status_code=503, detail="Solana RPC not configured.")
+
+    try:
+        stake_accounts = await fetch_stake_accounts_for_owner(rpc_url, owner_pubkey)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=f"RPC error: {e}") from e
+
+    if not stake_accounts:
+        return {
+            "owner_pubkey": owner_pubkey,
+            "objective": objective,
+            "moves": [],
+            "objective_before": None,
+            "objective_after": None,
+            "total_sol_moved": 0.0,
+            "notes": ["No stake accounts found for this wallet."],
+        }
+
+    voters = sorted({a.voter_pubkey for a in stake_accounts if a.voter_pubkey})
+    score_rows: dict[str, dict] = {}
+    if voters:
+        sql = text(
+            """
+            WITH latest AS (
+              SELECT DISTINCT ON (p.vote_pubkey) p.*
+                FROM predictions p
+               ORDER BY p.vote_pubkey, p.prediction_date DESC
+            )
+            SELECT v.vote_pubkey, v.name, v.data_center,
+                   l.composite_score, l.downtime_prob_7d, l.decentralization_score
+              FROM validators v
+              LEFT JOIN latest l ON l.vote_pubkey = v.vote_pubkey
+             WHERE v.vote_pubkey = ANY(:voters)
+            """
+        )
+        with engine.begin() as conn:
+            for row in conn.execute(sql, {"voters": voters}).mappings().all():
+                score_rows[row["vote_pubkey"]] = dict(row)
+
+    positions = []
+    for a in stake_accounts:
+        if not a.voter_pubkey:
+            continue
+        info = score_rows.get(a.voter_pubkey, {})
+        positions.append(
+            {
+                "voter_pubkey": a.voter_pubkey,
+                "sol": a.sol,
+                "name": info.get("name"),
+                "composite_score": _to_float(info.get("composite_score")),
+                "downtime_prob_7d": _to_float(info.get("downtime_prob_7d")),
+                "decentralization_score": _to_float(info.get("decentralization_score")),
+                "data_center": info.get("data_center"),
+            }
+        )
+
+    candidates = _fetch_candidate_validators(limit=50)
+    result = optimize(positions, candidates, objective=objective, max_moves=max_moves)
+    return {
+        "owner_pubkey": owner_pubkey,
+        "objective": result.objective,
+        "moves": [asdict(m) for m in result.moves],
+        "objective_before": result.objective_before,
+        "objective_after": result.objective_after,
+        "total_sol_moved": result.total_sol_moved,
+        "notes": result.notes,
+    }
+
+
 def _to_float(v) -> float | None:
     if v is None:
         return None
@@ -132,7 +215,7 @@ def _fetch_candidate_validators(limit: int = 25) -> list[dict]:
             FROM predictions p
            ORDER BY p.vote_pubkey, p.prediction_date DESC
         )
-        SELECT v.vote_pubkey, v.name,
+        SELECT v.vote_pubkey, v.name, v.data_center,
                l.composite_score, l.downtime_prob_7d, l.mev_tax_rate,
                l.decentralization_score
           FROM validators v

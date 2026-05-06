@@ -7,6 +7,7 @@ from sqlalchemy import text
 
 from stakesense.api.routers import anomalies as anomalies_router
 from stakesense.api.routers import backtest as backtest_router
+from stakesense.api.routers import developers as developers_router
 from stakesense.api.routers import export as export_router
 from stakesense.api.routers import portfolio as portfolio_router
 from stakesense.api.routers import recommend as recommend_router
@@ -50,3 +51,4 @@ app.include_router(export_router.router)
 app.include_router(portfolio_router.router)
 app.include_router(anomalies_router.router)
 app.include_router(simulate_router.router)
+app.include_router(developers_router.router)

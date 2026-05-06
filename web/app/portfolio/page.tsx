@@ -59,6 +59,26 @@ type Report = {
   rebalance_suggestions: Suggestion[];
 };
 
+type OptimizeMove = {
+  from_voter_pubkey: string;
+  from_validator_name: string | null;
+  to_voter_pubkey: string;
+  to_validator_name: string | null;
+  sol: number;
+  objective_delta: number;
+  rationale: string;
+};
+
+type OptimizeResult = {
+  owner_pubkey: string;
+  objective: "composite" | "downtime" | "decentralization";
+  moves: OptimizeMove[];
+  objective_before: number | null;
+  objective_after: number | null;
+  total_sol_moved: number;
+  notes: string[];
+};
+
 function pct(x: number | null) {
   return x == null ? "—" : `${(x * 100).toFixed(1)}%`;
 }
@@ -99,6 +119,29 @@ export default function PortfolioPage() {
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [optimize, setOptimize] = useState<OptimizeResult | null>(null);
+  const [optimizing, setOptimizing] = useState(false);
+  const [objective, setObjective] = useState<
+    "composite" | "downtime" | "decentralization"
+  >("composite");
+
+  async function runOptimizer() {
+    if (!report) return;
+    setOptimizing(true);
+    setOptimize(null);
+    try {
+      const r = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/portfolio/${report.owner_pubkey}/optimize?objective=${objective}&max_moves=5`,
+      );
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.detail || `request failed: ${r.status}`);
+      setOptimize(j as OptimizeResult);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Optimization failed");
+    } finally {
+      setOptimizing(false);
+    }
+  }
 
   async function fetchReport(pk: string) {
     setLoading(true);
@@ -209,8 +252,137 @@ export default function PortfolioPage() {
         </div>
       )}
 
-      {report && <ReportView report={report} />}
+      {report && (
+        <>
+          <ReportView report={report} />
+          <section className="border rounded-lg p-5 bg-violet-50/40 mb-8">
+            <div className="flex flex-wrap items-baseline justify-between gap-3 mb-3">
+              <div>
+                <h2 className="text-xl font-bold mb-1">
+                  Auto-optimize for objective
+                </h2>
+                <p className="text-xs text-slate-600">
+                  Greedy swap finder — caps at 5 moves, avoids same-data-center
+                  destinations.
+                </p>
+              </div>
+              <div className="flex gap-2 items-center">
+                <select
+                  value={objective}
+                  onChange={(e) =>
+                    setObjective(
+                      e.target.value as
+                        | "composite"
+                        | "downtime"
+                        | "decentralization",
+                    )
+                  }
+                  className="border rounded px-2 py-1.5 text-sm bg-white"
+                >
+                  <option value="composite">Maximize composite</option>
+                  <option value="downtime">Minimize downtime risk</option>
+                  <option value="decentralization">
+                    Maximize decentralization
+                  </option>
+                </select>
+                <button
+                  onClick={runOptimizer}
+                  disabled={optimizing}
+                  className="px-4 py-1.5 bg-violet-700 text-white rounded text-sm font-medium hover:bg-violet-800 disabled:opacity-50"
+                >
+                  {optimizing ? "Optimizing…" : "Find best moves"}
+                </button>
+              </div>
+            </div>
+            {optimize && <OptimizerView result={optimize} />}
+          </section>
+        </>
+      )}
     </main>
+  );
+}
+
+function OptimizerView({ result }: { result: OptimizeResult }) {
+  const isDowntime = result.objective === "downtime";
+  const beforeFmt =
+    result.objective_before == null
+      ? "—"
+      : isDowntime
+        ? `${(result.objective_before * 100).toFixed(1)}%`
+        : result.objective_before.toFixed(3);
+  const afterFmt =
+    result.objective_after == null
+      ? "—"
+      : isDowntime
+        ? `${(Math.abs(result.objective_after) * 100).toFixed(1)}%`
+        : result.objective_after.toFixed(3);
+  return (
+    <div>
+      <div className="grid grid-cols-3 gap-2 mb-3 text-sm">
+        <div className="bg-white border rounded p-3">
+          <div className="text-[10px] uppercase tracking-wide text-slate-500">
+            Before
+          </div>
+          <div className="font-bold tabular-nums">{beforeFmt}</div>
+        </div>
+        <div className="bg-white border rounded p-3">
+          <div className="text-[10px] uppercase tracking-wide text-slate-500">
+            After
+          </div>
+          <div className="font-bold tabular-nums">{afterFmt}</div>
+        </div>
+        <div className="bg-white border rounded p-3">
+          <div className="text-[10px] uppercase tracking-wide text-slate-500">
+            SOL moved
+          </div>
+          <div className="font-bold tabular-nums">
+            {result.total_sol_moved.toLocaleString(undefined, {
+              maximumFractionDigits: 2,
+            })}
+          </div>
+        </div>
+      </div>
+      {result.notes.length > 0 && (
+        <ul className="text-xs text-slate-700 mb-3 space-y-1">
+          {result.notes.map((n, i) => (
+            <li key={i}>· {n}</li>
+          ))}
+        </ul>
+      )}
+      {result.moves.length > 0 && (
+        <div className="border rounded bg-white overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-100">
+              <tr>
+                <th className="text-left px-3 py-2">From</th>
+                <th className="text-left px-3 py-2">To</th>
+                <th className="text-right px-3 py-2">SOL</th>
+                <th className="text-left px-3 py-2">Why</th>
+              </tr>
+            </thead>
+            <tbody>
+              {result.moves.map((m) => (
+                <tr key={m.from_voter_pubkey + m.to_voter_pubkey} className="border-t">
+                  <td className="px-3 py-2">
+                    {m.from_validator_name ||
+                      m.from_voter_pubkey.slice(0, 6) + "…"}
+                  </td>
+                  <td className="px-3 py-2">
+                    {m.to_validator_name || m.to_voter_pubkey.slice(0, 6) + "…"}
+                  </td>
+                  <td className="px-3 py-2 text-right tabular-nums">
+                    {m.sol.toFixed(2)}
+                  </td>
+                  <td className="px-3 py-2 text-xs text-slate-700">
+                    {m.rationale}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
   );
 }
 

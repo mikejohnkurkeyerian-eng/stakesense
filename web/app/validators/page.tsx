@@ -9,17 +9,37 @@ export const dynamic = "force-dynamic";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string; limit?: string; offset?: string }>;
+  searchParams: Promise<{
+    sort?: string;
+    limit?: string;
+    offset?: string;
+    country?: string;
+    asn?: string;
+    max_commission?: string;
+    q?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const sort = sp.sort ?? "composite";
   const limit = Number(sp.limit ?? 200);
   const offset = Number(sp.offset ?? 0);
+  const country = sp.country?.trim() || undefined;
+  const asn = sp.asn?.trim() || undefined;
+  const max_commission = sp.max_commission ? Number(sp.max_commission) : undefined;
+  const q = sp.q?.trim() || undefined;
 
   let data: { results: unknown[]; total: number } | null = null;
   let error: string | null = null;
   try {
-    data = (await listValidators({ sort, limit, offset })) as {
+    data = (await listValidators({
+      sort,
+      limit,
+      offset,
+      country,
+      asn,
+      max_commission,
+      q,
+    })) as {
       results: unknown[];
       total: number;
     };
@@ -63,11 +83,103 @@ export default async function Page({
 
   return (
     <main className="container mx-auto p-6">
+      <ValidatorFilters
+        defaults={{
+          q: q ?? "",
+          country: country ?? "",
+          asn: asn ?? "",
+          max_commission: max_commission?.toString() ?? "",
+          sort,
+        }}
+      />
       <ValidatorsTable
         rows={data.results as never}
         total={data.total}
         sort={sort}
       />
     </main>
+  );
+}
+
+function ValidatorFilters({
+  defaults,
+}: {
+  defaults: {
+    q: string;
+    country: string;
+    asn: string;
+    max_commission: string;
+    sort: string;
+  };
+}) {
+  return (
+    <form
+      method="get"
+      action="/validators"
+      className="border rounded-lg p-4 bg-white mb-4 grid grid-cols-2 md:grid-cols-6 gap-3 items-end"
+    >
+      <input type="hidden" name="sort" value={defaults.sort} />
+      <label className="col-span-2 md:col-span-2 block">
+        <span className="text-xs uppercase tracking-wide text-slate-500 block mb-1">
+          Search name
+        </span>
+        <input
+          name="q"
+          defaultValue={defaults.q}
+          placeholder="e.g. shinobi"
+          className="border rounded px-2 py-1.5 w-full text-sm"
+        />
+      </label>
+      <label className="block">
+        <span className="text-xs uppercase tracking-wide text-slate-500 block mb-1">
+          Country
+        </span>
+        <input
+          name="country"
+          defaultValue={defaults.country}
+          placeholder="US"
+          className="border rounded px-2 py-1.5 w-full text-sm"
+        />
+      </label>
+      <label className="block">
+        <span className="text-xs uppercase tracking-wide text-slate-500 block mb-1">
+          ASN
+        </span>
+        <input
+          name="asn"
+          defaultValue={defaults.asn}
+          placeholder="16125"
+          className="border rounded px-2 py-1.5 w-full text-sm"
+        />
+      </label>
+      <label className="block">
+        <span className="text-xs uppercase tracking-wide text-slate-500 block mb-1">
+          Max comm %
+        </span>
+        <input
+          name="max_commission"
+          type="number"
+          min="0"
+          max="100"
+          defaultValue={defaults.max_commission}
+          placeholder="10"
+          className="border rounded px-2 py-1.5 w-full text-sm"
+        />
+      </label>
+      <div className="flex gap-2">
+        <button
+          type="submit"
+          className="px-4 py-1.5 bg-slate-900 text-white rounded text-sm font-medium hover:bg-slate-800"
+        >
+          Apply
+        </button>
+        <Link
+          href="/validators"
+          className="px-3 py-1.5 border border-slate-300 rounded text-sm hover:bg-slate-50"
+        >
+          Reset
+        </Link>
+      </div>
+    </form>
   );
 }
