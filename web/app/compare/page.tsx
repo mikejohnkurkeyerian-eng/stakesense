@@ -107,7 +107,7 @@ export default async function ComparePage({
                     href={`/compare?vs=${pks
                       .filter((pk) => pk !== v.vote_pubkey)
                       .join(",")}`}
-                    className="text-slate-300 hover:text-red-500 text-sm"
+                    className="text-slate-500 hover:text-red-600 text-sm"
                     aria-label="Remove from comparison"
                   >
                     ×

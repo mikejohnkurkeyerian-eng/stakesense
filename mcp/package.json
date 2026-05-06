@@ -1,6 +1,6 @@
 {
   "name": "stakesense-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server for stakesense — predictive Solana validator quality scoring. Lets Claude Desktop, Claude Code, and Cursor query validator scores, recommendations, and decentralization data natively.",
   "keywords": [
     "mcp",

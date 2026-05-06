@@ -7,7 +7,7 @@
 
 ## What it gives an agent
 
-Eight tools and five resources, all backed by the public stakesense REST API:
+Eleven tools and five resources, all backed by the public stakesense REST API:
 
 ### Tools
 
@@ -22,6 +22,7 @@ Eight tools and five resources, all backed by the public stakesense REST API:
 | `get_concentration_by` | Top clusters along one axis (data_center / asn / country) |
 | `get_network_stats` | Global summary (averages, latest epoch, validator count) |
 | `get_recent_anomalies` | What changed in the validator set this week (MEV jumps, delinquency, score moves) |
+| `simulate_migration` | What-if rebalance: pass before/after allocations, get composite + concentration deltas |
 | `health_check` | API liveness + last refresh timestamp |
 
 ### Resources (read-once context)

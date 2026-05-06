@@ -205,10 +205,21 @@ Open http://localhost:3000.
 
 ```bash
 cd api
-pytest                 # 18 tests, all integration-grade against live DB
+pytest                 # 60+ tests, integration-grade against live DB
 ```
 
 Tests use a sentinel pubkey (`TEST_FIXTURE_Vote111_DO_NOT_USE_AS_REAL`) so they're safe to run against the production database — they never trample real validator rows.
+
+## Discord alerts
+
+Daily Discord summary of validator anomalies (MEV jumps, new delinquencies, score movers):
+
+```bash
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/... \
+python -m api.scripts.post_anomalies_to_discord --limit 5
+```
+
+Run with `--dry-run` to preview before posting. Cron-friendly — designed to fire after each data refresh.
 
 ## Hackathon
 

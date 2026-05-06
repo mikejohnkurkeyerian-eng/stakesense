@@ -197,6 +197,45 @@ export const TOOLS: Tool[] = [
       properties: {},
     },
   },
+  {
+    name: "simulate_migration",
+    description:
+      "What-if analysis on a stake rebalance: pass a `before` and `after` allocation " +
+      "(arrays of {voter_pubkey, sol}) and receive stake-weighted composite, downtime, " +
+      "MEV, and decentralization scores for each side, plus deltas, concentration buckets, " +
+      "and human-readable insights. Use to answer 'if I moved X SOL from A to B, how much " +
+      "would my portfolio improve?'",
+    inputSchema: {
+      type: "object",
+      properties: {
+        before: {
+          type: "array",
+          description: "Current allocation",
+          items: {
+            type: "object",
+            properties: {
+              voter_pubkey: { type: "string" },
+              sol: { type: "number", minimum: 0 },
+            },
+            required: ["voter_pubkey", "sol"],
+          },
+        },
+        after: {
+          type: "array",
+          description: "Hypothetical allocation",
+          items: {
+            type: "object",
+            properties: {
+              voter_pubkey: { type: "string" },
+              sol: { type: "number", minimum: 0 },
+            },
+            required: ["voter_pubkey", "sol"],
+          },
+        },
+      },
+      required: ["before", "after"],
+    },
+  },
 ];
 
 export async function callTool(
@@ -256,6 +295,17 @@ export async function callTool(
     }
     case "health_check": {
       return client.health();
+    }
+    case "simulate_migration": {
+      const before = (args.before ?? []) as Array<{
+        voter_pubkey: string;
+        sol: number;
+      }>;
+      const after = (args.after ?? []) as Array<{
+        voter_pubkey: string;
+        sol: number;
+      }>;
+      return client.simulate({ before, after });
     }
     default:
       throw new Error(`unknown tool: ${name}`);

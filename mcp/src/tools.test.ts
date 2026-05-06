@@ -44,11 +44,16 @@ function makeFakeClient(): StakesenseClient {
       gap_to_top50: -0.03,
     }),
     anomalies: vi.fn().mockResolvedValue({ detections: [] }),
+    simulate: vi.fn().mockResolvedValue({
+      before: { total_sol: 0, weighted_composite: null, weighted_downtime_prob: null, weighted_mev_tax: null, weighted_decentralization: null, by_data_center: [], by_asn: [], by_country: [], n_validators: 0 },
+      after: { total_sol: 0, weighted_composite: null, weighted_downtime_prob: null, weighted_mev_tax: null, weighted_decentralization: null, by_data_center: [], by_asn: [], by_country: [], n_validators: 0 },
+      delta: { composite: null, downtime_prob: null, mev_tax: null, decentralization: null, top_dc_pct: null, top_asn_pct: null, top_country_pct: null, insights: ["No material change between allocations."] },
+    }),
   } as unknown as StakesenseClient;
 }
 
 describe("TOOLS catalog", () => {
-  it("exposes the ten expected tools", () => {
+  it("exposes the eleven expected tools", () => {
     const names = TOOLS.map((t) => t.name).sort();
     expect(names).toEqual([
       "get_concentration_by",
@@ -61,6 +66,7 @@ describe("TOOLS catalog", () => {
       "health_check",
       "list_validators",
       "recommend_top_validators",
+      "simulate_migration",
     ]);
   });
 
@@ -164,6 +170,21 @@ describe("callTool dispatch", () => {
     const c = makeFakeClient();
     await callTool(c, "get_recent_anomalies", {});
     expect(c.anomalies).toHaveBeenCalledWith(20);
+  });
+
+  it("simulate_migration forwards before/after lists to client.simulate", async () => {
+    const c = makeFakeClient();
+    const before = [{ voter_pubkey: "AAA", sol: 100 }];
+    const after = [{ voter_pubkey: "BBB", sol: 100 }];
+    const out = await callTool(c, "simulate_migration", { before, after });
+    expect(c.simulate).toHaveBeenCalledWith({ before, after });
+    expect((out as { delta: { insights: string[] } }).delta.insights).toBeDefined();
+  });
+
+  it("simulate_migration defaults to empty lists when args omitted", async () => {
+    const c = makeFakeClient();
+    await callTool(c, "simulate_migration", {});
+    expect(c.simulate).toHaveBeenCalledWith({ before: [], after: [] });
   });
 
   it("unknown tool throws", async () => {

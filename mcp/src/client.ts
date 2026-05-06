@@ -99,6 +99,13 @@ export class StakesenseClient {
   anomalies(limit = 20): Promise<AnomaliesResponse> {
     return this.get(`/api/v1/anomalies?limit=${limit}`);
   }
+
+  simulate(opts: {
+    before: Array<{ voter_pubkey: string; sol: number }>;
+    after: Array<{ voter_pubkey: string; sol: number }>;
+  }): Promise<SimulateResponse> {
+    return this.post("/api/v1/simulate", opts);
+  }
 }
 
 // ----- Types (mirror the REST shapes) -----
@@ -242,4 +249,31 @@ export interface AnomalyDetection {
 
 export interface AnomaliesResponse {
   detections: AnomalyDetection[];
+}
+
+export interface AllocationReport {
+  total_sol: number;
+  weighted_composite: number | null;
+  weighted_downtime_prob: number | null;
+  weighted_mev_tax: number | null;
+  weighted_decentralization: number | null;
+  by_data_center: Array<{ label: string; sol: number; pct: number }>;
+  by_asn: Array<{ label: string; sol: number; pct: number }>;
+  by_country: Array<{ label: string; sol: number; pct: number }>;
+  n_validators: number;
+}
+
+export interface SimulateResponse {
+  before: AllocationReport;
+  after: AllocationReport;
+  delta: {
+    composite: number | null;
+    downtime_prob: number | null;
+    mev_tax: number | null;
+    decentralization: number | null;
+    top_dc_pct: number | null;
+    top_asn_pct: number | null;
+    top_country_pct: number | null;
+    insights: string[];
+  };
 }
