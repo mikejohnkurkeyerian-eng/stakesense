@@ -1,15 +1,15 @@
-# @stakesense/react-widget
+# stakesense-react-widget
 
 React components for embedding [stakesense](https://github.com/mikejohnkurkeyerian-eng/stakesense) validator scores in your app. Companion to the framework-agnostic [widget.js](../../web/public/widget.js) drop-in.
 
 ```bash
-npm install @stakesense/react-widget
+npm install stakesense-react-widget
 ```
 
 ## Usage
 
 ```tsx
-import { ValidatorScore, TopValidators } from "@stakesense/react-widget";
+import { ValidatorScore, TopValidators } from "stakesense-react-widget";
 
 export default function StakingPage() {
   return (

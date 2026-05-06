@@ -1,5 +1,5 @@
 {
-  "name": "@stakesense/react-widget",
+  "name": "stakesense-react-widget",
   "version": "0.1.0",
   "description": "React components for embedding stakesense validator scores. Companion to the framework-agnostic widget.js.",
   "keywords": [
