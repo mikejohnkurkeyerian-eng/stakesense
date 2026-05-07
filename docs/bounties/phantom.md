@@ -16,10 +16,12 @@ Stakesense is an open-source ML oracle that scores every active Solana mainnet v
 **The Phantom-specific surfaces:**
 
 1. `/stake` — full Phantom wallet-adapter integration with `@solana/wallet-adapter-react`, `WalletMultiButton`, devnet airdrop helper, and a recommended-validator picker
-2. `/portfolio` — pulls the connected Phantom wallet's stake accounts via RPC, scores each delegation, surfaces concentration risk, suggests rebalances. Read-only — no signing required, just the connected pubkey
+2. `/portfolio` — pulls the connected Phantom wallet's stake accounts via RPC, scores each delegation, surfaces concentration risk, suggests rebalances. Includes a one-click **share link** (`?wallet=…&optimize=…`) so the analysis can be DM'd to a co-signer without asking them to re-paste the pubkey. Read-only — no signing required.
 3. **Connect-on-demand UX** — the wallet picker appears only when an action requires signing, so the dashboard is browsable without forcing a connection
 4. **Auto-fill from connected wallet** on `/portfolio` — one click and the user's exposure analysis fills in
 5. **Devnet-first** with explicit warm-up explainer, airdrop helper, and a 3-step "switch network" banner so users new to staking can finish the flow
+6. **Validator search box** on the landing page so a Phantom user can paste any vote pubkey from their existing stake accounts and land directly on the detail page
+7. **Per-validator OG image cards** — every `/validators/{pk}` page emits a custom social card so stakers sharing a recommendation get a rich preview in any chat client
 
 **Why this is the most natural Phantom integration in the cohort:**
 - Phantom is already the canonical Solana wallet for staking flows — most validator tools expose vote pubkeys but stop short of signing

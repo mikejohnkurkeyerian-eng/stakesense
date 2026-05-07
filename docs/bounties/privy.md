@@ -40,7 +40,7 @@ The transitive-dependency fix is worth flagging: Privy's `@solana-program/token@
 
 1. **Funding flow** — let Privy users buy SOL with USDC/card via Privy's funding APIs and stake immediately (one-flow signup → fund → stake)
 2. **Cross-device session continuity** — email login on mobile, sign on desktop
-3. **Privy-native risk alerts** — opt-in notifications when a user's staked validator crosses a risk threshold
+3. **Privy-native risk alerts** — opt-in notifications when a user's staked validator crosses a risk threshold (the watch-subscription backend at `/api/v1/watch` already exists; this would wire Privy's notification surface to it)
 4. **DAO-style multi-user wallets** — combine Privy with Squads for treasury staking with email-authenticated council members
 
 ## Demo prompt for judges

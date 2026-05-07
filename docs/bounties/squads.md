@@ -19,9 +19,12 @@ Stakesense scores every active Solana validator on three pillars (downtime risk,
    - Total staked SOL, weighted composite score
    - Concentration risk (data center, ASN, country) — important for treasury policies that explicitly require geographic diversity
    - Per-position scoring with rebalance suggestions
-2. **MCP server** ([`stakesense-mcp`](https://www.npmjs.com/package/stakesense-mcp)) — Squads operators using Claude / Cursor can ask "is our treasury overexposed to any one data center?" and the agent answers from live data
-3. **Open data exports** — DAOs that want to build internal staking dashboards can pull `predictions.csv` directly under CC-BY 4.0
-4. **Embeddable widget** — drops a stakesense score into Squads UI add-ons or DAO governance forums
+   - **One-click share link** — `?wallet=…&optimize=…` encodes the vault + objective so a council member can post the analysis in a Squads thread without re-pasting
+2. **`/simulate` what-if engine** — model a hypothetical rebalance before opening a Squads proposal. Pre-fills the After column via a "Find best swap" optimizer button so a council can show "current treasury vs. proposed allocation" with composite/downtime/decentralization deltas in one click
+3. **MCP server** ([`stakesense-mcp`](https://www.npmjs.com/package/stakesense-mcp)) — Squads operators using Claude / Cursor can ask "is our treasury overexposed to any one data center?" and the agent answers from live data
+4. **Open data exports** — DAOs that want to build internal staking dashboards can pull `predictions.csv` directly under CC-BY 4.0
+5. **Embeddable widget** + **`stakesense-react-widget` npm package** — drops a stakesense score into Squads UI add-ons or DAO governance forums
+6. **Compare API** (`/api/v1/compare?vs=A,B,C`) — load 4 candidate validators side-by-side in one round-trip, perfect for council voting attachments
 
 **Shipped: `/stake/multisig` — generic multisig stake-tx generator.** A read-only page that:
 
@@ -45,7 +48,9 @@ For Squads specifically:
 ## Code references
 
 - **Multisig stake-tx generator:** `web/app/stake/multisig/page.tsx`
+- **Find-best-swap simulator:** `web/app/simulate/page.tsx`, `api/src/stakesense/api/routers/simulate.py` (POST `/api/v1/simulate/optimize`)
 - Portfolio analyzer (works with any pubkey including multisig vaults): `web/app/portfolio/page.tsx`, `api/src/stakesense/api/routers/portfolio.py`, `api/src/stakesense/scoring/portfolio.py`
+- Compare endpoint: `api/src/stakesense/api/routers/compare.py`
 - Stake account discovery via RPC: `api/src/stakesense/sources/stake_accounts.py`
 - MCP server: `mcp/src/`
 - Open-data exports: `api/src/stakesense/api/routers/export.py`

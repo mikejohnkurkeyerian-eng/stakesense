@@ -4,10 +4,11 @@ Drafts for each Solana Frontier sponsor where stakesense has a real surface. Eac
 
 | Sponsor | Stakesense surface | Status |
 |---|---|---|
-| [Phantom](phantom.md) | One-click stake flow on `/stake`, portfolio analyzer on `/portfolio` | ✅ Live |
+| [Solana Foundation](solana_foundation.md) | Public Goods track — open data, MCP server, embeddable widget, methodology, Nakamoto coefficient | ✅ Live |
+| [Phantom](phantom.md) | One-click stake flow on `/stake`, portfolio analyzer with auto-fill from connected wallet | ✅ Live (devnet) |
 | [Privy](privy.md) | Email/social/embedded-wallet alternative to Phantom on `/stake` | ✅ Live (needs `NEXT_PUBLIC_PRIVY_APP_ID` set in Vercel) |
-| [Solana Foundation](solana_foundation.md) | Public Goods track — open data, MCP, methodology, Nakamoto coefficient | ✅ Live |
-| [Squads](squads.md) | Portfolio analyzer works with multisig vaults today; `/stake/dao` flow on roadmap | 🟡 Partial |
+| [Squads](squads.md) | `/stake/multisig` Squads/Realms-compatible stake-tx generator + portfolio analyzer for vault PDAs | ✅ Live |
+| [Arcium](arcium.md) | `/api/v1/private/recommend` roadmap stub showing confidential-staking integration shape | 🟡 Stub (intentional — design pinned, MPC program is the bounty target) |
 
 ## Submission checklist
 
@@ -18,7 +19,7 @@ For each one:
 3. Confirm the contact email is correct
 4. Find the sponsor's submission form / Discord channel
 5. Paste the draft (markdown is usually fine — most sponsor forms render it)
-6. Attach 2-3 screenshots if the form allows
+6. Attach 2–3 screenshots if the form allows
 7. Add the demo video URL once recorded (Day 7)
 
 ## Common attachments to have ready
@@ -32,5 +33,6 @@ For each one:
 
 1. **Solana Foundation Public Goods** first — biggest single tier ($10k), most aligned with the project's open-data thesis
 2. **Phantom** — most polished integration, lowest risk of rejection
-3. **Privy** — depends on Privy app being configured; submit after `NEXT_PUBLIC_PRIVY_APP_ID` is set
-4. **Squads** — partial integration; honest framing matters here ("portfolio analyzer works today, full DAO flow roadmapped")
+3. **Squads** — `/stake/multisig` is shipped today; honest framing about the SDK-native upgrade as bounty target
+4. **Privy** — depends on Privy app being configured; submit after `NEXT_PUBLIC_PRIVY_APP_ID` is set
+5. **Arcium** — submit last with intentionally honest "stub today, integration shape pinned" framing

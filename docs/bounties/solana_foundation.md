@@ -31,7 +31,11 @@ Stakesense fills that gap with an **open ML oracle** anyone can use, fork, audit
 3. **Methodology:** Long-form paper (`docs/METHODOLOGY.md`) explaining every feature, every weight, every limitation — written so an auditor can reproduce the entire pipeline from scratch in <15 minutes
 4. **Model card:** Standard transparency artifact (`MODEL_CARD.md`) following Mitchell et al. conventions
 5. **MCP server:** `stakesense-mcp` on npm — Claude / Cursor / any MCP-compatible LLM agent can query validator quality natively. AI agents are a growing class of consumer; building MCP support means AI tools that touch Solana have first-class access to predictive scoring.
-6. **Embeddable widget:** `<script>` + `<div data-stakesense-validator>` lets *any* Solana site drop in scores. Distribution-as-a-public-good.
+6. **Embeddable widget:** `<script>` + `<div data-stakesense-validator>` plus an npm React package (`stakesense-react-widget`) lets *any* Solana site drop in scores. Distribution-as-a-public-good.
+7. **Daily digest email** (`scripts/send_daily_digest.py`) — defer-to-user Resend integration that any operator can clone to publish their own digest from the same data.
+8. **Watch-validator subscription model** — anyone can register a Discord/Slack/generic webhook to anomaly alerts on any validator without an account, no rate-limiting beyond the global limiter.
+9. **Operator dashboard** at `/operator/[vote_pubkey]` — flips the lens so validators can see their own scoring + improvement levers. Two-sided market story: stakers and operators read the same data with different framing.
+10. **Confidential-staking roadmap stub** at `/api/v1/private/recommend` — pins the design shape for an Arcium-backed integration where users can ask the oracle for picks without revealing stake size or risk profile.
 
 ## Decentralization-first design
 
@@ -52,10 +56,11 @@ A delegator using stakesense who follows the recommendations is *systematically*
 | Validators with full geographic metadata | 752 |
 | Historical epoch-performance rows | 5,500+ |
 | Jito MEV commission observations | 2,186 |
-| Composite predictions written | 3,914 |
-| Cron refresh cadence | 2x/day, 100% green for 7+ days |
-| Tests passing (api + mcp) | 32 + 13 = 45 |
-| Concrete public-goods deliverables | 6 (code, data, methodology, model card, MCP, widget) |
+| Composite predictions written | 3,900+ (rolling) |
+| Cron refresh cadence | 2x/day, 100% green for the entire push window |
+| Tests passing (api + mcp + react-widget) | 105 + 17 + 2 = 124 |
+| Routes / endpoints surfaced | 25+ web routes · 20+ REST endpoints |
+| Concrete public-goods deliverables | 8 (code, data, methodology, model card, MCP, widget, daily digest, Arcium-roadmap stub) |
 
 ## Sustainability post-hackathon
 
