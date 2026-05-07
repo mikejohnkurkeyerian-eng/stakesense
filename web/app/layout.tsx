@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import ApiWarmup from "@/components/ApiWarmup";
 import ConnectBar from "@/components/ConnectBar";
 import Footer from "@/components/Footer";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import WalletProvider from "@/components/WalletProvider";
 
 import "./globals.css";
@@ -74,6 +75,7 @@ export default function RootLayout({
             {children}
           </div>
           <Footer />
+          <PWAInstallPrompt />
         </WalletProvider>
       </body>
     </html>

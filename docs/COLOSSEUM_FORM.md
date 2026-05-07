@@ -29,16 +29,17 @@ Stakesense ships as **a layered set of surfaces** so judges, builders, and end u
 5. **A migration simulator** at `/simulate` — what-if rebalances with composite/downtime/decentralization deltas + insights.
 6. **A multisig staker** at `/stake/multisig` for DAO treasuries (Squads/Realms-compatible).
 7. **A developer hub** at `/developers` exposing OpenAPI 3.1 + Postman v2.1 + curl quickstart.
-8. **An alert layer**: Discord & Slack webhook posters for anomalies, a Bluesky daily-digest scaffold, a watch-validator subscription model with cron-driven dispatch, and a reusable GitHub Actions workflow other projects can call to monitor their own validators in CI.
+8. **An alert layer**: Discord & Slack webhook posters for anomalies, a Bluesky daily-digest scaffold, a watch-validator subscription model with cron-driven dispatch, an HTML email digest with Resend integration, and a reusable GitHub Actions workflow other projects can call to monitor their own validators in CI.
+9. **A confidential-staking roadmap stub** at `/api/v1/private/recommend` showing how the same scoring would run inside Arcium MPC so stakers can ask "where should I delegate?" without leaking amount or risk profile.
 
-Stakesense is solo-built in 14 days for the Colosseum hackathon. ~75 commits, 60 test files (82 passing api + 17 mcp + 2 react-widget + portfolio integration tests against live RPC), Vercel + Render + Supabase deploy, GitHub Actions cron refresh twice daily, Phantom wallet integration on /stake (devnet), Privy email/social as alternative auth.
+Stakesense is solo-built in 14 days for the Colosseum hackathon. 80+ commits, 105 passing api tests + 17 mcp + 2 react-widget + portfolio integration tests against live RPC, Vercel + Render + Supabase deploy, GitHub Actions cron refresh twice daily, Phantom wallet integration on /stake (devnet), Privy email/social as alternative auth.
 
 Why it wins: it's the only validator-quality layer that's simultaneously public-data infrastructure, agent-native (MCP), embeddable (widget), portfolio-aware, alert-capable, and CI-ready. Each surface widens the audience and the integration story.
 
 ## Categories targeted
 - Public Goods ($10k tier) — open data + open code + open methodology
 - Top-20 Standout ($10k tier)
-- Sponsor bounties: Phantom, Privy, Squads, Solana Foundation
+- Sponsor bounties: Phantom, Privy, Squads, Solana Foundation, Arcium (roadmap stub)
 
 ## Demo URL
 https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app
@@ -53,7 +54,7 @@ https://github.com/mikejohnkurkeyerian-eng/stakesense (MIT)
 `npm i -g stakesense-mcp` · published
 
 ## React widget
-`npm i @stakesense/react-widget` · published
+`npm i stakesense-react-widget` · published
 
 ## Demo video
 TBD — 2 min, follow `docs/DEMO_SCRIPT.md`

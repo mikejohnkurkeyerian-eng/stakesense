@@ -11,6 +11,7 @@ from stakesense.api.routers import compare as compare_router
 from stakesense.api.routers import developers as developers_router
 from stakesense.api.routers import export as export_router
 from stakesense.api.routers import portfolio as portfolio_router
+from stakesense.api.routers import private as private_router
 from stakesense.api.routers import recommend as recommend_router
 from stakesense.api.routers import simulate as simulate_router
 from stakesense.api.routers import validators as validators_router
@@ -56,3 +57,4 @@ app.include_router(simulate_router.router)
 app.include_router(developers_router.router)
 app.include_router(watch_router.router)
 app.include_router(compare_router.router)
+app.include_router(private_router.router)

@@ -30,11 +30,11 @@ Every component is reproducible: features, training script, model weights, and p
 ## What's shipped
 
 ### Core platform
-- ✅ FastAPI backend on Render (8+ endpoints, sub-second p99, OpenAPI spec)
-- ✅ Next.js 16 dashboard on Vercel with 8 pages (landing, validators table, validator detail with history charts, /compare, /backtest, /methodology, /stake, /portfolio, /about)
-- ✅ Postgres on Supabase with 4 tables, ~5500 epoch rows, 789 validators, 2186 MEV observations
+- ✅ FastAPI backend on Render (20+ endpoints, sub-second p99, OpenAPI spec, rate-limited)
+- ✅ Next.js 16 dashboard on Vercel with 25+ routes (landing with validator search, browser, detail with history + per-validator OG cards, /compare, /backtest, /methodology, /stake, /portfolio with share links, /simulate with auto-fill, /operator with watch opt-in, /alerts, /research, /developers, /playground, /sponsors, /widget, /integrations/mcp, /about, /data, /changelog, /stake/multisig)
+- ✅ Postgres on Supabase with 5 tables (validators, epoch_performance, mev_observations, predictions, watch_subscriptions), ~5500 epoch rows, 789 validators, 2186 MEV observations
 - ✅ Twice-daily GitHub Actions cron (refresh → train → predict)
-- ✅ 18/18 pytest tests passing
+- ✅ 105/105 pytest tests passing + 17 MCP tests + 2 react-widget tests
 - ✅ Phantom wallet stake flow on devnet
 - ✅ Privy email/social auth as Phantom alternative
 - ✅ MEV-aware composite scoring with backtest charts
@@ -50,8 +50,9 @@ Every component is reproducible: features, training script, model weights, and p
 ### Sponsor surfaces
 - ✅ **Phantom** — wallet-adapter staking flow (devnet) with one-click delegate from `/recommend`
 - ✅ **Privy** — email/social embedded wallet onboarding alongside Phantom
-- ✅ **Squads** *(scaffold)* — DAO multisig staking flow at `/stake/dao`
+- ✅ **Squads** — DAO multisig staking flow at `/stake/multisig` (Squads/Realms-compatible serialize-and-paste)
 - ✅ **Solana Foundation** — Nakamoto coefficient surfacing, decentralization-first scoring, Public Goods alignment
+- ✅ **Arcium** *(roadmap stub)* — `/api/v1/private/recommend` returning the standard recommendations alongside a confidentiality envelope describing the production target (encrypted inputs, ranking inside an MPC program, only top-K voter pubkeys leave the computation)
 
 ### Distribution
 - ✅ **MCP server** (`stakesense-mcp` on npm) — Claude Desktop, Claude Code, and Cursor can natively query validator quality
@@ -120,8 +121,8 @@ Every component is reproducible: features, training script, model weights, and p
 - **2,186** Jito MEV-commission observations
 - **3,914** composite predictions written
 - **2.7%** delinquent share captured
-- **Cron runs:** 2x/day, mean ~6 min E2E, 100% green for 7+ days
-- **Test coverage:** 18/18 passing
+- **Cron runs:** 2x/day, mean ~6 min E2E, 100% green for the entire push window
+- **Test coverage:** 105 api + 17 mcp + 2 react-widget — all green
 - **Lighthouse scores:** *(filled in Day 6)*
 
 ## Roadmap post-hackathon
