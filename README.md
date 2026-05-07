@@ -6,7 +6,7 @@
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![data](https://img.shields.io/badge/data-CC--BY%204.0-blueviolet)](docs/METHODOLOGY.md)
 [![hackathon](https://img.shields.io/badge/Solana%20Frontier-2026-9333ea)](https://colosseum.com/frontier)
-[![tests](https://img.shields.io/badge/tests-18%2F18-22c55e)](#testing)
+[![tests](https://img.shields.io/badge/tests-124%20passing-22c55e)](#testing)
 [![public goods](https://img.shields.io/badge/track-Public%20Goods-fbbf24)](docs/SUBMISSION.md)
 
 ## Live
@@ -16,6 +16,7 @@
 | Dashboard | https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app |
 | Validators | [/validators](https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/validators) |
 | Compare | [/compare](https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/compare) |
+| Migration simulator | [/simulate](https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/simulate) |
 | Portfolio analyzer | [/portfolio](https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/portfolio) |
 | Stake (devnet) | [/stake](https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/stake) |
 | Backtest | [/backtest](https://stakesense-el77-git-main-california-mortgage-solutions.vercel.app/backtest) |
