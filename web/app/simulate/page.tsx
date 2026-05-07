@@ -67,6 +67,11 @@ export default function SimulatePage() {
   const [report, setReport] = useState<SimReport | null>(null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [findingBest, setFindingBest] = useState(false);
+  const [optimizeNotes, setOptimizeNotes] = useState<string[]>([]);
+  const [bestObjective, setBestObjective] = useState<
+    "composite" | "downtime" | "decentralization"
+  >("composite");
 
   useEffect(() => {
     (async () => {
@@ -109,6 +114,46 @@ export default function SimulatePage() {
     setAfter(before.map((b) => ({ ...b, id: uid() })));
   }
 
+  async function findBestSwap() {
+    if (!before.length) return;
+    setFindingBest(true);
+    setError(null);
+    setOptimizeNotes([]);
+    try {
+      const r = await fetch(`${API_BASE}/api/v1/simulate/optimize`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          before: before.map(({ voter_pubkey, sol }) => ({ voter_pubkey, sol })),
+          objective: bestObjective,
+          max_moves: 5,
+        }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.detail || `request failed: ${r.status}`);
+      const suggested: { voter_pubkey: string; sol: number }[] = j.after || [];
+      setAfter(
+        suggested.map((s) => ({ id: uid(), voter_pubkey: s.voter_pubkey, sol: s.sol }))
+      );
+      setOptimizeNotes(j.notes || []);
+      // Auto-run the simulation so deltas appear immediately.
+      const sim = await fetch(`${API_BASE}/api/v1/simulate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          before: before.map(({ voter_pubkey, sol }) => ({ voter_pubkey, sol })),
+          after: suggested,
+        }),
+      });
+      const simBody = await sim.json();
+      if (sim.ok) setReport(simBody as SimReport);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "optimization failed");
+    } finally {
+      setFindingBest(false);
+    }
+  }
+
   async function run() {
     setRunning(true);
     setError(null);
@@ -146,7 +191,7 @@ export default function SimulatePage() {
         No wallet, no signing — pure what-if analysis using the latest model predictions.
       </p>
 
-      <div className="flex flex-wrap gap-3 mb-6">
+      <div className="flex flex-wrap gap-3 mb-3 items-center">
         <button
           disabled={validatorsLoading}
           onClick={loadExample}
@@ -169,6 +214,46 @@ export default function SimulatePage() {
           {running ? "Simulating…" : "Run simulation"}
         </button>
       </div>
+
+      <div className="flex flex-wrap gap-2 items-center mb-6 p-3 border border-violet-200 rounded-lg bg-violet-50/50">
+        <span className="text-sm font-semibold text-violet-900">
+          ✨ Auto-fill After:
+        </span>
+        <select
+          value={bestObjective}
+          onChange={(e) =>
+            setBestObjective(
+              e.target.value as "composite" | "downtime" | "decentralization"
+            )
+          }
+          className="border rounded px-2 py-1.5 text-sm bg-white"
+          disabled={findingBest}
+        >
+          <option value="composite">Maximize composite</option>
+          <option value="downtime">Minimize downtime risk</option>
+          <option value="decentralization">Maximize decentralization</option>
+        </select>
+        <button
+          disabled={findingBest || !before.length}
+          onClick={findBestSwap}
+          className="px-3 py-1.5 bg-violet-700 text-white rounded text-sm font-medium hover:bg-violet-800 disabled:opacity-50"
+        >
+          {findingBest ? "Finding…" : "Find best swap"}
+        </button>
+        <span className="text-xs text-slate-600 ml-auto">
+          Greedy optimizer fills the After column from your Before allocation.
+        </span>
+      </div>
+
+      {optimizeNotes.length > 0 && (
+        <div className="border-l-4 border-violet-400 bg-violet-50 p-3 rounded mb-4 text-sm text-violet-900">
+          <ul className="space-y-1">
+            {optimizeNotes.map((n, i) => (
+              <li key={i}>· {n}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {error && (
         <div className="border-l-4 border-red-500 bg-red-50 p-4 rounded mb-6 text-sm text-red-900">

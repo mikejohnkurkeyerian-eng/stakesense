@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import PredictionHistoryChart from "@/components/PredictionHistoryChart";
 
+import OperatorWatchOptIn from "./OperatorWatchOptIn";
+
 export const dynamic = "force-dynamic";
 import type { PredictionPoint } from "@/lib/api";
 
@@ -154,6 +156,8 @@ export default async function OperatorPage({
       <p className="text-slate-500 font-mono text-xs mb-8 break-all">
         {v.vote_pubkey}
       </p>
+
+      <OperatorWatchOptIn votePubkey={vote_pubkey} />
 
       {rank && (
         <section className="mb-10">
