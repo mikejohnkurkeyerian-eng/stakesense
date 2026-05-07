@@ -3,7 +3,8 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import Link from "next/link";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 type Position = {
   stake_account: string;
@@ -114,7 +115,16 @@ function severityClasses(s: Warning["severity"]) {
 }
 
 export default function PortfolioPage() {
+  return (
+    <Suspense fallback={null}>
+      <PortfolioPageInner />
+    </Suspense>
+  );
+}
+
+function PortfolioPageInner() {
   const { publicKey, connected } = useWallet();
+  const searchParams = useSearchParams();
   const [input, setInput] = useState("");
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(false);
@@ -124,6 +134,7 @@ export default function PortfolioPage() {
   const [objective, setObjective] = useState<
     "composite" | "downtime" | "decentralization"
   >("composite");
+  const [copied, setCopied] = useState(false);
 
   async function runOptimizer() {
     if (!report) return;
@@ -168,6 +179,41 @@ export default function PortfolioPage() {
       const pk = publicKey.toBase58();
       setInput(pk);
       fetchReport(pk);
+    }
+  }
+
+  // Auto-load from ?wallet=…&optimize=… so share links work.
+  useEffect(() => {
+    const walletParam = searchParams.get("wallet");
+    const objectiveParam = searchParams.get("optimize");
+    if (
+      objectiveParam === "composite" ||
+      objectiveParam === "downtime" ||
+      objectiveParam === "decentralization"
+    ) {
+      setObjective(objectiveParam);
+    }
+    if (walletParam && walletParam !== input) {
+      setInput(walletParam);
+      fetchReport(walletParam);
+    }
+    // Run only on first mount. Subsequent param changes don't trigger re-fetch
+    // because the user's interactive Analyze button is the source of truth.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function copyShareLink() {
+    if (!report) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("wallet", report.owner_pubkey);
+    url.searchParams.set("optimize", objective);
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Older browsers — fall back to opening a prompt-style dialog.
+      window.prompt("Copy this link:", url.toString());
     }
   }
 
@@ -254,6 +300,15 @@ export default function PortfolioPage() {
 
       {report && (
         <>
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={copyShareLink}
+              className="px-3 py-1.5 border border-slate-300 rounded text-sm hover:bg-slate-50 font-medium inline-flex items-center gap-2"
+              aria-label="Copy share link to this analysis"
+            >
+              {copied ? "✓ Copied" : "🔗 Copy share link"}
+            </button>
+          </div>
           <ReportView report={report} />
           <section className="border rounded-lg p-5 bg-violet-50/40 mb-8">
             <div className="flex flex-wrap items-baseline justify-between gap-3 mb-3">

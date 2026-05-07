@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import ValidatorSearch from "@/components/ValidatorSearch";
 import type { Recommendation } from "@/lib/types";
 
 // Skip static generation at build time — Render free-tier cold-starts can take
@@ -256,6 +257,9 @@ export default async function Home() {
             claude mcp add stakesense -- npx stakesense-mcp
           </code>
         </p>
+        <div className="mt-10 max-w-xl mx-auto">
+          <ValidatorSearch />
+        </div>
       </section>
 
       {stats && (
